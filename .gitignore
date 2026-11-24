@@ -1,0 +1,73 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Production build
+build/
+dist/
+
+# Testing
+coverage/
+*.lcov
+test-results/
+playwright-report/
+
+# Environment files
+.env
+.env*
+!.env.example
+!.env.production.example
+!.env.*.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# TypeScript
+*.tsbuildinfo
+
+# Tooling caches
+.eslintcache
+.cache/
+.turbo/
+
+# Vercel
+.vercel
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Local certificates and keys
+*.pem
+*.key
+
+# Docker / local volumes
+pgdata/
