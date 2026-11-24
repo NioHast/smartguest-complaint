@@ -12,11 +12,9 @@
     "db:reset": "node scripts/reset-db.js"
   },
   "engines": {
-    "node": ">=22.5"
+    "node": ">=23.4.0"
   },
   "dependencies": {
-    "canvas-confetti": "^1.9.4",
-    "framer-motion": "^12.40.0",
     "lucide-react": "^1.17.0",
     "next": "16.2.6",
     "openai": "^6.39.1",
@@ -26,7 +24,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",

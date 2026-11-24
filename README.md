@@ -47,7 +47,7 @@ Pemetaan ini tetap dan dipakai otomatis saat petugas memverifikasi keluhan.
 
 ## Menjalankan
 
-Prasyarat: Node.js >= 22.5 (memakai `node:sqlite` bawaan).
+Prasyarat: Node.js >= 23.4.0. Modul `node:sqlite` tersedia tanpa flag sejak v23.4.0 (dan v22.13.0), jadi versi ini dipilih sebagai batas aman; Node 24/26 direkomendasikan karena Node 23 bukan LTS.
 
 ```bash
 cd app
@@ -58,13 +58,64 @@ npm run dev
 
 Buka `http://localhost:3000`, lalu login dengan `staff@smartguest.local` / `password`.
 
-Konfigurasi LLM di `app/.env` (hanya dibaca di server):
+Semua konfigurasi bersifat opsional; lihat [Variabel Lingkungan](#variabel-lingkungan).
 
-| Variabel | Keterangan |
-| --- | --- |
-| `AI_API_KEY` | Kunci API. Kosongkan untuk mode aturan kata kunci. |
-| `AI_BASE_URL` | Endpoint OpenAI-compatible, default `https://api.deepseek.com`. |
-| `AI_MODEL` | Model yang dipakai, default `deepseek-chat`. |
+## Dependensi
+
+### Kebutuhan sistem
+
+| Kebutuhan | Versi | Keterangan |
+| --- | --- | --- |
+| Node.js | >= 23.4.0 | Wajib. Aplikasi memakai modul bawaan `node:sqlite`, yang tersedia tanpa flag sejak v23.4.0 (dan v22.13.0); versi ini dipilih sebagai batas aman. Node 24/26 direkomendasikan karena Node 23 bukan LTS. |
+| npm | ikut terpasang bersama Node.js | Dipakai untuk `npm install` dan menjalankan skrip di `app/`. |
+| Docker | tidak perlu | Aplikasi berjalan langsung di localhost tanpa kontainer. |
+| Server database (MySQL/PostgreSQL) | tidak perlu | Data disimpan di satu file SQLite lokal. |
+| Layanan cloud | tidak perlu | Tidak ada dependensi layanan eksternal; LLM bersifat opsional. |
+
+### Paket runtime dan pengembangan
+
+Daftar diambil dari `app/package.json`; versi ditulis persis seperti di file tersebut.
+
+| Paket | Versi | Untuk apa di proyek ini |
+| --- | --- | --- |
+| `next` | 16.2.6 | Framework React dan App Router, termasuk route API di `app/src/app/api`. |
+| `react` | 19.2.4 | Library UI untuk komponen halaman. |
+| `react-dom` | 19.2.4 | Renderer React untuk DOM browser. |
+| `recharts` | ^3.8.1 | Grafik ringkasan status dan kategori di dasbor. |
+| `lucide-react` | ^1.17.0 | Ikon di antarmuka. |
+| `openai` | ^6.39.1 | Klien LLM OpenAI-compatible (default DeepSeek) di `app/src/lib/ai.ts`. |
+| `@tailwindcss/postcss` | ^4 | Plugin PostCSS untuk Tailwind CSS v4 di `app/postcss.config.mjs`. |
+| `tailwindcss` | ^4 | Styling utility-first untuk seluruh antarmuka. |
+| `typescript` | ^5 | Tipe statis dan kompilasi TypeScript. |
+| `eslint` | ^9 | Linter untuk `npm run lint`. |
+| `eslint-config-next` | 16.2.6 | Aturan ESLint bawaan Next.js. |
+| `@types/node` | ^26 | Definisi tipe Node.js. |
+| `@types/react` | ^19 | Definisi tipe React. |
+| `@types/react-dom` | ^19 | Definisi tipe React DOM. |
+
+### Dependensi opsional
+
+| Kebutuhan | Wajib? | Keterangan |
+| --- | --- | --- |
+| API key DeepSeek (`AI_API_KEY`) | Opsional | Mengaktifkan klasifikasi LLM. Tanpa key, aplikasi tetap berjalan memakai aturan kata kunci deterministik. |
+| Playwright | Tidak dibutuhkan | Bukan dependensi proyek dan tidak dipakai untuk menjalankan atau menguji aplikasi; tes memakai `node --test` (`app/tests/workflow.test.mjs`). |
+
+## Variabel Lingkungan
+
+Dibaca di sisi server dari `app/.env` atau environment proses. Semua opsional; tanpa konfigurasi apa pun aplikasi tetap berjalan.
+
+| Variabel | Wajib/Opsional | Default | Keterangan |
+| --- | --- | --- | --- |
+| `AI_API_KEY` | Opsional | kosong | Kunci API DeepSeek. Bila diisi, klasifikasi memakai LLM; bila kosong, memakai aturan kata kunci. |
+| `AI_BASE_URL` | Opsional | `https://api.deepseek.com` | Endpoint OpenAI-compatible untuk jalur `AI_API_KEY`. |
+| `AI_MODEL` | Opsional | `deepseek-chat` | Model untuk jalur `AI_API_KEY`; saat AI tidak aktif nilainya tidak berpengaruh pada klasifikasi. |
+| `OPENAI_API_KEY` | Opsional | kosong | Kompatibilitas lama; hanya dipakai bila `AI_API_KEY` kosong. |
+| `OPENAI_BASE_URL` | Opsional | tidak diset (default SDK OpenAI) | Endpoint untuk jalur `OPENAI_API_KEY`. |
+| `OPENAI_MODEL` | Opsional | `gpt-4o-mini` | Model untuk jalur `OPENAI_API_KEY`. |
+| `SMARTGUEST_DB_PATH` | Opsional | `data/smartguest.db` relatif terhadap direktori kerja `app/` | Lokasi file SQLite. Juga dibaca `app/scripts/reset-db.js`, tetapi skrip itu tidak memuat `.env`, jadi set lewat environment saat menjalankan perintah. |
+| `PORT` | Opsional | `3000` | Port server; dibaca oleh CLI Next.js (`next dev`/`next start`), bukan oleh kode aplikasi. `npm run dev:3123` menimpanya dengan `-p 3123`. |
+
+Rujukan kode: `app/src/lib/ai.ts` (konfigurasi LLM) dan `app/src/lib/db.ts` (lokasi database).
 
 ## Mode tanpa API key
 
