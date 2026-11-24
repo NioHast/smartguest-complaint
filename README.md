@@ -83,7 +83,7 @@ Daftar diambil dari `app/package.json`; versi ditulis persis seperti di file ter
 | `react-dom` | 19.2.4 | Renderer React untuk DOM browser. |
 | `recharts` | ^3.8.1 | Grafik ringkasan status dan kategori di dasbor. |
 | `lucide-react` | ^1.17.0 | Ikon di antarmuka. |
-| `openai` | ^6.39.1 | Klien LLM OpenAI-compatible (default DeepSeek) di `app/src/lib/ai.ts`. |
+| `openai` | ^6.39.1 | SDK klien untuk API OpenAI-compatible; dipakai memanggil DeepSeek. |
 | `@tailwindcss/postcss` | ^4 | Plugin PostCSS untuk Tailwind CSS v4 di `app/postcss.config.mjs`. |
 | `tailwindcss` | ^4 | Styling utility-first untuk seluruh antarmuka. |
 | `typescript` | ^5 | Tipe statis dan kompilasi TypeScript. |
@@ -109,17 +109,14 @@ Dibaca di sisi server dari `app/.env` atau environment proses. Semua opsional; t
 | `AI_API_KEY` | Opsional | kosong | Kunci API DeepSeek. Bila diisi, klasifikasi memakai LLM; bila kosong, memakai aturan kata kunci. |
 | `AI_BASE_URL` | Opsional | `https://api.deepseek.com` | Endpoint OpenAI-compatible untuk jalur `AI_API_KEY`. |
 | `AI_MODEL` | Opsional | `deepseek-chat` | Model untuk jalur `AI_API_KEY`; saat AI tidak aktif nilainya tidak berpengaruh pada klasifikasi. |
-| `OPENAI_API_KEY` | Opsional | kosong | Kompatibilitas lama; hanya dipakai bila `AI_API_KEY` kosong. |
-| `OPENAI_BASE_URL` | Opsional | tidak diset (default SDK OpenAI) | Endpoint untuk jalur `OPENAI_API_KEY`. |
-| `OPENAI_MODEL` | Opsional | `gpt-4o-mini` | Model untuk jalur `OPENAI_API_KEY`. |
 | `SMARTGUEST_DB_PATH` | Opsional | `data/smartguest.db` relatif terhadap direktori kerja `app/` | Lokasi file SQLite. Juga dibaca `app/scripts/reset-db.js`, tetapi skrip itu tidak memuat `.env`, jadi set lewat environment saat menjalankan perintah. |
 | `PORT` | Opsional | `3000` | Port server; dibaca oleh CLI Next.js (`next dev`/`next start`), bukan oleh kode aplikasi. `npm run dev:3123` menimpanya dengan `-p 3123`. |
 
 Rujukan kode: `app/src/lib/ai.ts` (konfigurasi LLM) dan `app/src/lib/db.ts` (lokasi database).
 
-## Mode tanpa API key
+## Konfigurasi AI dan mode tanpa API key
 
-Jika `AI_API_KEY` kosong, klasifikasi memakai aturan kata kunci deterministik dan aplikasi tetap berjalan. Badge di header menunjukkan mode aktif: "AI aktif (nama model)" atau "Aturan kata kunci (AI tidak aktif)".
+Konfigurasi punya dua tingkat: bila `AI_API_KEY` diisi, klasifikasi memakai LLM; bila kosong, klasifikasi memakai aturan kata kunci deterministik dan aplikasi tetap berjalan. Tidak ada jalur konfigurasi lain. Untuk provider lain yang OpenAI-compatible, cukup ganti `AI_BASE_URL` dan `AI_MODEL`. Badge di header menunjukkan mode aktif: "AI aktif (nama model)" atau "Aturan kata kunci (AI tidak aktif)".
 
 ## Perintah
 

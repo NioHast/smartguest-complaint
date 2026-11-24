@@ -1,11 +1,11 @@
 // Mesin klasifikasi keluhan SmartGuest.
 //
 // Dua jalur:
-// 1. LLM (OpenAI SDK, mendukung OPENAI_BASE_URL untuk provider kompatibel).
+// 1. LLM (SDK OpenAI; endpoint diatur lewat AI_BASE_URL untuk provider kompatibel).
 // 2. Fallback aturan kata kunci Bahasa Indonesia yang selalu berjalan tanpa
 //    API key dan selalu menghasilkan salah satu dari 5 kategori tetap.
 
-import OpenAI from 'openai';
+import OpenAI from "openai";
 import type { CategoryCode } from './types';
 
 export type ClassificationSource = 'llm' | 'rules';
@@ -255,7 +255,6 @@ export function classifyByRules(text: string): ClassificationResult {
 
 const DEFAULT_AI_MODEL = 'deepseek-chat';
 const DEFAULT_AI_BASE_URL = 'https://api.deepseek.com';
-const DEFAULT_OPENAI_MODEL = 'gpt-4o-mini';
 const REQUEST_TIMEOUT_MS = 7_000;
 const MAX_OUTPUT_TOKENS = 200;
 
@@ -270,7 +269,8 @@ Balas HANYA dengan JSON valid tanpa markdown:
 {"kategori":"<kebersihan|teknisi|fnb|resepsionis|perlu_ditinjau>","confidence":<angka 0 sampai 1>,"alasan":"<alasan singkat Bahasa Indonesia>"}
 Jika ragu, gunakan perlu_ditinjau. Jangan menambahkan kunci lain.`;
 
-export type AiProvider = 'deepseek' | 'openai' | 'none';
+/** 'llm' = ada konfigurasi AI; 'none' = mode aturan kata kunci. */
+export type AiProvider = 'llm' | 'none';
 
 export interface AiConfig {
   provider: AiProvider;
@@ -286,31 +286,21 @@ export interface AiStatus {
 }
 
 /**
- * Konfigurasi server-side. Prioritas:
- * 1. AI_API_KEY + AI_BASE_URL + AI_MODEL (default DeepSeek).
- * 2. OPENAI_API_KEY + OPENAI_BASE_URL + OPENAI_MODEL (kompatibilitas lama).
- * 3. Tanpa key -> mode aturan kata kunci.
+ * Konfigurasi server-side. Dua tingkat:
+ * 1. AI_API_KEY + AI_BASE_URL + AI_MODEL (default DeepSeek) -> LLM.
+ * 2. Tanpa AI_API_KEY -> mode aturan kata kunci.
  *
+ * Provider OpenAI-compatible lain cukup lewat AI_BASE_URL + AI_MODEL.
  * Tidak pernah memakai NEXT_PUBLIC_* agar key tidak bocor ke browser.
  */
 export function getAiConfig(): AiConfig {
-  const deepseekKey = process.env.AI_API_KEY?.trim();
-  if (deepseekKey) {
+  const apiKey = process.env.AI_API_KEY?.trim();
+  if (apiKey) {
     return {
-      provider: 'deepseek',
-      apiKey: deepseekKey,
+      provider: 'llm',
+      apiKey,
       baseURL: process.env.AI_BASE_URL?.trim() || DEFAULT_AI_BASE_URL,
       model: process.env.AI_MODEL?.trim() || DEFAULT_AI_MODEL,
-    };
-  }
-
-  const openaiKey = process.env.OPENAI_API_KEY?.trim();
-  if (openaiKey) {
-    return {
-      provider: 'openai',
-      apiKey: openaiKey,
-      baseURL: process.env.OPENAI_BASE_URL?.trim() || undefined,
-      model: process.env.OPENAI_MODEL?.trim() || DEFAULT_OPENAI_MODEL,
     };
   }
 

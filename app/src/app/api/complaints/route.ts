@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     const guestName = typeof body.guest_name === 'string' && body.guest_name.trim() ? body.guest_name.trim() : null;
     const roomNumber = typeof body.room_number === 'string' && body.room_number.trim() ? body.room_number.trim() : null;
 
-    // Klasifikasi AI (LLM bila OPENAI_API_KEY tersedia, selain itu aturan kata kunci).
+    // Klasifikasi AI (LLM bila AI_API_KEY tersedia, selain itu aturan kata kunci).
     const classification = await classifyComplaint(rawText);
 
     const complaint = await dbService.createComplaint({

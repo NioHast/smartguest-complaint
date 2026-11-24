@@ -419,7 +419,7 @@ export default function DashboardPage() {
   const [detailsError, setDetailsError] = useState<string | null>(null);
   const [aiStatus, setAiStatus] = useState<{
     configured: boolean;
-    provider: 'deepseek' | 'openai' | 'none';
+    provider: 'llm' | 'none';
     model: string;
   } | null>(null);
 
@@ -479,7 +479,7 @@ export default function DashboardPage() {
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    apiFetch<{ configured: boolean; provider: 'deepseek' | 'openai' | 'none'; model: string }>(
+    apiFetch<{ configured: boolean; provider: 'llm' | 'none'; model: string }>(
       '/api/ai-status',
       { cache: 'no-store' }
     ).then((result) => {
@@ -698,7 +698,7 @@ export default function DashboardPage() {
               (aiStatus.configured ? (
                 <span
                   className="flex items-center gap-1.5"
-                  title={`Penyedia: ${aiStatus.provider}`}
+                  title="Klasifikasi memakai LLM"
                 >
                   <span className="dot" style={{ background: 'var(--accent)' }} aria-hidden="true" />
                   AI aktif ({aiStatus.model})
