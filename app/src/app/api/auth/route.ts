@@ -45,7 +45,7 @@ export async function GET(request: Request) {
   if (!user) {
     return NextResponse.json({ error: 'Sesi berakhir. Silakan masuk kembali.' }, { status: 401 });
   }
-  return NextResponse.json({ session: { user, avatarUrl: null } });
+  return NextResponse.json({ session: { user } });
 }
 
 export async function DELETE(request: Request) {

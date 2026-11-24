@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   full_name TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'staff' CHECK (role IN ('admin', 'manager', 'staff')),
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 
@@ -58,7 +57,6 @@ CREATE INDEX IF NOT EXISTS idx_complaints_category ON complaints(category);
 CREATE TABLE IF NOT EXISTS complaint_analysis (
   id TEXT PRIMARY KEY,
   complaint_id TEXT NOT NULL UNIQUE REFERENCES complaints(id) ON DELETE CASCADE,
-  summary TEXT NOT NULL,
   ai_response_raw TEXT,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );

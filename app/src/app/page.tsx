@@ -385,7 +385,6 @@ export default function DashboardPage() {
   const [detailsError, setDetailsError] = useState<string | null>(null);
   const [aiStatus, setAiStatus] = useState<{
     configured: boolean;
-    provider: 'llm' | 'none';
     model: string;
   } | null>(null);
 
@@ -445,7 +444,7 @@ export default function DashboardPage() {
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    apiFetch<{ configured: boolean; provider: 'llm' | 'none'; model: string }>(
+    apiFetch<{ configured: boolean; model: string }>(
       '/api/ai-status',
       { cache: 'no-store' }
     ).then((result) => {

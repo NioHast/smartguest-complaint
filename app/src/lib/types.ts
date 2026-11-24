@@ -86,7 +86,6 @@ export interface Profile {
   id: string;
   email: string;
   full_name: string;
-  role: 'admin' | 'manager' | 'staff';
   updated_at: string;
 }
 
@@ -114,7 +113,6 @@ export interface Complaint {
 export interface ComplaintAnalysis {
   id: string;
   complaint_id: string;
-  summary: string;
   ai_response_raw?: unknown;
   created_at: string;
 }

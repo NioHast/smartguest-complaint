@@ -64,7 +64,6 @@ export async function POST(request: Request) {
       ai_category: classification.category,
       ai_confidence: classification.confidence,
       ai_reason: classification.reason,
-      summary: rawText,
       ai_response_raw: {
         kategori: classification.category,
         confidence: classification.confidence,

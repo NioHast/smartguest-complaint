@@ -18,9 +18,6 @@ export const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export interface SessionData {
   user: Profile;
-  // Kept for API compatibility with the UI. Always null locally so no external
-  // avatar service is required; the UI falls back to the user's initial.
-  avatarUrl: string | null;
 }
 
 export interface LoginResult {
@@ -57,7 +54,6 @@ export async function loginStaff(email: string, password: string): Promise<Login
     id: record.id,
     email: record.email,
     full_name: record.full_name,
-    role: record.role,
     updated_at: record.updated_at,
   };
 
@@ -65,7 +61,7 @@ export async function loginStaff(email: string, password: string): Promise<Login
     success: true,
     token,
     expiresAt: expires_at,
-    session: { user, avatarUrl: null },
+    session: { user },
   };
 }
 
@@ -82,11 +78,6 @@ export function getSessionUserFromToken(token?: string | null): Profile | null {
     console.error('Session lookup failed:', err);
     return null;
   }
-}
-
-export function getSessionDataFromToken(token?: string | null): SessionData | null {
-  const user = getSessionUserFromToken(token);
-  return user ? { user, avatarUrl: null } : null;
 }
 
 /** Reads the session cookie from a Request without importing next/headers. */

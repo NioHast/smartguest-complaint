@@ -6,7 +6,6 @@ import type { Profile } from '@/lib/types';
 
 interface AuthContextType {
   user: Profile | null;
-  avatarUrl: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
@@ -16,7 +15,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<Profile | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -30,14 +28,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!response.ok) {
           if (!cancelled) {
             setUser(null);
-            setAvatarUrl(null);
           }
           return;
         }
         const data = await response.json();
         if (!cancelled && data?.session?.user) {
           setUser(data.session.user);
-          setAvatarUrl(data.session.avatarUrl ?? null);
         }
       } catch (e) {
         console.error('Failed to restore session:', e);
@@ -70,7 +66,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data.session) {
         setUser(data.session.user);
-        setAvatarUrl(data.session.avatarUrl ?? null);
         setLoading(false);
         router.push('/');
         return { success: true };
@@ -91,12 +86,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Failed to clear session:', e);
     }
     setUser(null);
-    setAvatarUrl(null);
     router.push('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, avatarUrl, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

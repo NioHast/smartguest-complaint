@@ -5,8 +5,8 @@ import { requireUser } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 
 /**
- * Status konfigurasi LLM untuk UI. Sengaja tidak mengembalikan API key,
- * hanya apakah LLM aktif, penyedia, dan nama model.
+ * Status konfigurasi LLM untuk UI. Sengaja tidak mengembalikan API key atau
+ * detail penyedia, hanya apakah LLM aktif dan nama model.
  */
 export async function GET(request: Request) {
   const user = requireUser(request);

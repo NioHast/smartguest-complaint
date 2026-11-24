@@ -5,15 +5,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  STATUS_ORDER,
   ALLOWED_TRANSITIONS,
   canTransition,
   CATEGORY_TO_DEPARTMENT,
 } from '../src/lib/workflow.ts';
 import { CATEGORIES, DEPARTMENTS } from '../src/lib/types.ts';
 
-test('STATUS_ORDER berisi urutan alur kerja baru -> diproses -> selesai', () => {
-  assert.deepEqual(STATUS_ORDER, ['baru', 'diproses', 'selesai']);
+test('ALLOWED_TRANSITIONS mencakup ketiga status alur kerja', () => {
+  assert.deepEqual(Object.keys(ALLOWED_TRANSITIONS), ['baru', 'diproses', 'selesai']);
 });
 
 test('canTransition mengizinkan baru -> diproses', () => {

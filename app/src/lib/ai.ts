@@ -70,7 +70,6 @@ export interface AiConfig {
 
 export interface AiStatus {
   configured: boolean;
-  provider: AiProvider;
   model: string;
 }
 
@@ -104,7 +103,6 @@ export function getAiStatus(): AiStatus {
   const config = getAiConfig();
   return {
     configured: config.provider !== 'none',
-    provider: config.provider,
     model: config.model,
   };
 }

@@ -5,9 +5,6 @@
 
 import type { CategoryCode, ComplaintStatus, DepartmentCode } from './types';
 
-/** Urutan status alur kerja: Baru -> Diproses -> Selesai. */
-export const STATUS_ORDER: readonly ComplaintStatus[] = ['baru', 'diproses', 'selesai'];
-
 /**
  * Transisi status yang diizinkan. `baru` tidak boleh langsung ke `selesai`:
  * keluhan wajib melewati status `diproses` (verifikasi) lebih dulu.
