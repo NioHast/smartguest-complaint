@@ -79,20 +79,6 @@ export const STATUS_LABELS: Record<ComplaintStatus, string> = {
 };
 
 // ---------------------------------------------------------------------------
-// Sumber klasifikasi
-// ---------------------------------------------------------------------------
-
-export const AI_SOURCES = ['llm', 'rules', 'manual'] as const;
-
-export type AiSource = (typeof AI_SOURCES)[number];
-
-export const AI_SOURCE_LABELS: Record<AiSource, string> = {
-  llm: 'AI',
-  rules: 'Aturan kata kunci',
-  manual: 'Manual',
-};
-
-// ---------------------------------------------------------------------------
 // Entitas
 // ---------------------------------------------------------------------------
 
@@ -112,7 +98,6 @@ export interface Complaint {
   raw_text: string;
   ai_category?: CategoryCode;
   ai_confidence?: number;
-  ai_source?: AiSource;
   ai_reason?: string;
   category?: CategoryCode;
   department?: DepartmentCode;

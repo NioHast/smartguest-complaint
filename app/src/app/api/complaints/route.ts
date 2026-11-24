@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { dbService } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
-import { classifyComplaint } from '@/lib/ai';
+import { ClassifierError, classifyComplaint, type ClassificationResult } from '@/lib/ai';
 import { CHANNELS, type Channel } from '@/lib/types';
 
 export async function GET(request: Request) {
@@ -44,8 +44,17 @@ export async function POST(request: Request) {
     const guestName = typeof body.guest_name === 'string' && body.guest_name.trim() ? body.guest_name.trim() : null;
     const roomNumber = typeof body.room_number === 'string' && body.room_number.trim() ? body.room_number.trim() : null;
 
-    // Klasifikasi AI (LLM bila AI_API_KEY tersedia, selain itu aturan kata kunci).
-    const classification = await classifyComplaint(rawText);
+    // Klasifikasi AI wajib berhasil; tanpa hasil klasifikasi keluhan tidak disimpan.
+    let classification: ClassificationResult;
+    try {
+      classification = await classifyComplaint(rawText);
+    } catch (err) {
+      if (err instanceof ClassifierError) {
+        const status = err.code === 'NOT_CONFIGURED' ? 503 : 502;
+        return NextResponse.json({ error: err.message }, { status });
+      }
+      throw err;
+    }
 
     const complaint = await dbService.createComplaint({
       guest_name: guestName,
@@ -54,14 +63,12 @@ export async function POST(request: Request) {
       raw_text: rawText,
       ai_category: classification.category,
       ai_confidence: classification.confidence,
-      ai_source: classification.source,
       ai_reason: classification.reason,
       summary: rawText,
       ai_response_raw: {
         kategori: classification.category,
         confidence: classification.confidence,
         alasan: classification.reason,
-        sumber: classification.source,
       },
       created_by: user.id,
       actor: user.full_name,

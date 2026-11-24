@@ -1,5 +1,7 @@
 # SmartGuest Complaint — Spesifikasi Dataset dan Metodologi Evaluasi
 
+> Catatan implementasi: jalur klasifikasi aturan kata kunci dihapus; aplikasi hanya memakai LLM, dan tanpa API key pencatatan keluhan gagal (503).
+
 - Versi: 1.2
 - Tanggal: 4 November 2026
 - Status: spesifikasi; dataset dan harness belum dibuat

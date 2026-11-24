@@ -24,7 +24,6 @@ import {
 } from 'recharts';
 
 import {
-  AI_SOURCE_LABELS,
   CATEGORIES,
   CATEGORY_LABELS,
   CHANNELS,
@@ -132,27 +131,6 @@ function StatusBadge({ status }: { status: ComplaintStatus }) {
   );
 }
 
-function SourceBadge({ complaint }: { complaint: Complaint }) {
-  if (!complaint.ai_source) {
-    return <span className="text-[11px] text-[var(--ink-muted)]">-</span>;
-  }
-
-  const isRules = complaint.ai_source === 'rules';
-  return (
-    <span
-      className="badge badge-neutral"
-      title={isRules ? 'AI tidak aktif — klasifikasi memakai aturan kata kunci' : 'Diklasifikasikan oleh model AI'}
-    >
-      <span
-        className="dot"
-        style={{ background: isRules ? 'var(--warn)' : 'var(--accent)' }}
-        aria-hidden="true"
-      />
-      {AI_SOURCE_LABELS[complaint.ai_source]}
-    </span>
-  );
-}
-
 // ---------------------------------------------------------------------------
 // Panel verifikasi (dipakai di panel rekomendasi dan panel detail)
 // ---------------------------------------------------------------------------
@@ -230,24 +208,12 @@ function VerificationPanel({
           </dd>
         </div>
         <div className="detail-row py-2">
-          <dt className="detail-label">Sumber</dt>
-          <dd>
-            <SourceBadge complaint={complaint} />
-          </dd>
-        </div>
-        <div className="detail-row py-2">
           <dt className="detail-label">Alasan klasifikasi</dt>
           <dd className="text-[13px] leading-relaxed text-[var(--ink)]">
             {complaint.ai_reason || '-'}
           </dd>
         </div>
       </dl>
-
-      {complaint.ai_source === 'rules' && (
-        <p className="mt-3 border-t border-[var(--line)] pt-3 text-[11px] leading-relaxed text-[var(--warn)]">
-          AI tidak aktif — kategori dihasilkan dari aturan kata kunci Bahasa Indonesia.
-        </p>
-      )}
 
       {complaint.category ? (
         <div className="mt-3 border-t border-[var(--line)] pt-3">
@@ -554,6 +520,8 @@ export default function DashboardPage() {
     );
   }
 
+  const aiUnavailable = aiStatus !== null && !aiStatus.configured;
+
   // ---------------------------------------------------------------------
   // Turunan data dasbor
   // ---------------------------------------------------------------------
@@ -706,7 +674,7 @@ export default function DashboardPage() {
               ) : (
                 <span className="flex items-center gap-1.5">
                   <span className="dot" style={{ background: 'var(--warn)' }} aria-hidden="true" />
-                  Aturan kata kunci (AI tidak aktif)
+                  AI tidak aktif
                 </span>
               ))}
             <span className="hidden h-3 w-px bg-[var(--line)] sm:block" />
@@ -904,6 +872,15 @@ export default function DashboardPage() {
                   lalu petugas memverifikasi sebelum departemen ditentukan.
                 </p>
 
+                {aiUnavailable && (
+                  <div
+                    role="alert"
+                    className="mt-4 rounded-[4px] border border-[var(--warn)] px-3 py-2 text-xs font-medium leading-relaxed text-[var(--warn)]"
+                  >
+                    Klasifikasi AI belum dikonfigurasi. Isi AI_API_KEY di app/.env lalu restart server.
+                  </div>
+                )}
+
                 {submitError && (
                   <p className="mt-4 rounded-[4px] border border-[var(--danger)] px-3 py-2 text-xs font-medium text-[var(--danger)]">
                     {submitError}
@@ -964,7 +941,11 @@ export default function DashboardPage() {
                     />
                   </label>
 
-                  <button type="submit" disabled={submitting} className="btn btn-primary btn-block">
+                  <button
+                    type="submit"
+                    disabled={submitting || aiUnavailable}
+                    className="btn btn-primary btn-block"
+                  >
                     {submitting ? 'Mengklasifikasikan...' : 'Simpan & Klasifikasikan'}
                   </button>
                 </form>
@@ -1084,7 +1065,6 @@ export default function DashboardPage() {
                           <th>Kategori</th>
                           <th>Departemen</th>
                           <th>Status</th>
-                          <th>Sumber</th>
                           <th>Aksi</th>
                         </tr>
                       </thead>
@@ -1125,9 +1105,6 @@ export default function DashboardPage() {
                             </td>
                             <td>
                               <StatusBadge status={item.status} />
-                            </td>
-                            <td>
-                              <SourceBadge complaint={item} />
                             </td>
                             <td>
                               <StatusControl complaint={item} onUpdated={handleUpdated} onError={showError} />

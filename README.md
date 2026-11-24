@@ -25,7 +25,7 @@ README ini hanya memuat gambar dasbor. Tiga tampilan utama aplikasi:
 ## Fitur
 
 1. **Catat keluhan** — teks bebas, nama tamu, nomor kamar, dan kanal masuk.
-2. **Klasifikasi otomatis 5 kategori** — memakai AI bila dikonfigurasi, atau aturan kata kunci sebagai cadangan.
+2. **Klasifikasi otomatis 5 kategori** — memakai LLM. Tanpa `AI_API_KEY`, pencatatan keluhan ditolak dengan HTTP 503.
 3. **Verifikasi petugas** — petugas menyetujui atau mengubah kategori, disertai alasan perubahan bila ada.
 4. **Penentuan departemen** — ditetapkan otomatis dari kategori saat verifikasi.
 5. **Status Baru / Diproses / Selesai** — transisi dibatasi dan hanya lewat aksi petugas.
@@ -52,13 +52,13 @@ Prasyarat: Node.js >= 23.4.0. Modul `node:sqlite` tersedia tanpa flag sejak v23.
 ```bash
 cd app
 npm install
-# salin app/.env.example menjadi app/.env, lalu isi bila memakai AI
+# salin app/.env.example menjadi app/.env, lalu isi AI_API_KEY (wajib)
 npm run dev
 ```
 
 Buka `http://localhost:3000`, lalu login dengan `staff@smartguest.local` / `password`.
 
-Semua konfigurasi bersifat opsional; lihat [Variabel Lingkungan](#variabel-lingkungan).
+`AI_API_KEY` wajib diisi; tanpa key aplikasi tetap terbuka, tetapi pencatatan keluhan gagal. Lihat [Variabel Lingkungan](#variabel-lingkungan).
 
 ## Dependensi
 
@@ -70,7 +70,7 @@ Semua konfigurasi bersifat opsional; lihat [Variabel Lingkungan](#variabel-lingk
 | npm | ikut terpasang bersama Node.js | Dipakai untuk `npm install` dan menjalankan skrip di `app/`. |
 | Docker | tidak perlu | Aplikasi berjalan langsung di localhost tanpa kontainer. |
 | Server database (MySQL/PostgreSQL) | tidak perlu | Data disimpan di satu file SQLite lokal. |
-| Layanan cloud | tidak perlu | Tidak ada dependensi layanan eksternal; LLM bersifat opsional. |
+| Layanan cloud | tidak perlu | Tidak ada layanan cloud lain; klasifikasi memanggil API LLM eksternal yang wajib dikonfigurasi lewat `AI_API_KEY`. |
 
 ### Paket runtime dan pengembangan
 
@@ -93,30 +93,30 @@ Daftar diambil dari `app/package.json`; versi ditulis persis seperti di file ter
 | `@types/react` | ^19 | Definisi tipe React. |
 | `@types/react-dom` | ^19 | Definisi tipe React DOM. |
 
-### Dependensi opsional
+### Dependensi layanan eksternal dan pengujian
 
 | Kebutuhan | Wajib? | Keterangan |
 | --- | --- | --- |
-| API key DeepSeek (`AI_API_KEY`) | Opsional | Mengaktifkan klasifikasi LLM. Tanpa key, aplikasi tetap berjalan memakai aturan kata kunci deterministik. |
+| API key DeepSeek (`AI_API_KEY`) | Wajib | Satu-satunya jalur klasifikasi. Tanpa key, pencatatan keluhan gagal dengan HTTP 503. |
 | Playwright | Tidak dibutuhkan | Bukan dependensi proyek dan tidak dipakai untuk menjalankan atau menguji aplikasi; tes memakai `node --test` (`app/tests/workflow.test.mjs`). |
 
 ## Variabel Lingkungan
 
-Dibaca di sisi server dari `app/.env` atau environment proses. Semua opsional; tanpa konfigurasi apa pun aplikasi tetap berjalan.
+Dibaca di sisi server dari `app/.env` atau environment proses. Hanya `AI_API_KEY` yang wajib; variabel lain punya default.
 
 | Variabel | Wajib/Opsional | Default | Keterangan |
 | --- | --- | --- | --- |
-| `AI_API_KEY` | Opsional | kosong | Kunci API DeepSeek. Bila diisi, klasifikasi memakai LLM; bila kosong, memakai aturan kata kunci. |
+| `AI_API_KEY` | Wajib | kosong | Kunci API DeepSeek. Tanpa key, klasifikasi tidak berjalan dan pencatatan keluhan gagal (503). |
 | `AI_BASE_URL` | Opsional | `https://api.deepseek.com` | Endpoint OpenAI-compatible untuk jalur `AI_API_KEY`. |
-| `AI_MODEL` | Opsional | `deepseek-chat` | Model untuk jalur `AI_API_KEY`; saat AI tidak aktif nilainya tidak berpengaruh pada klasifikasi. |
+| `AI_MODEL` | Opsional | `deepseek-chat` | Model yang dipakai untuk klasifikasi. |
 | `SMARTGUEST_DB_PATH` | Opsional | `data/smartguest.db` relatif terhadap direktori kerja `app/` | Lokasi file SQLite. Juga dibaca `app/scripts/reset-db.js`, tetapi skrip itu tidak memuat `.env`, jadi set lewat environment saat menjalankan perintah. |
 | `PORT` | Opsional | `3000` | Port server; dibaca oleh CLI Next.js (`next dev`/`next start`), bukan oleh kode aplikasi. `npm run dev:3123` menimpanya dengan `-p 3123`. |
 
 Rujukan kode: `app/src/lib/ai.ts` (konfigurasi LLM) dan `app/src/lib/db.ts` (lokasi database).
 
-## Konfigurasi AI dan mode tanpa API key
+## Konfigurasi AI
 
-Konfigurasi punya dua tingkat: bila `AI_API_KEY` diisi, klasifikasi memakai LLM; bila kosong, klasifikasi memakai aturan kata kunci deterministik dan aplikasi tetap berjalan. Tidak ada jalur konfigurasi lain. Untuk provider lain yang OpenAI-compatible, cukup ganti `AI_BASE_URL` dan `AI_MODEL`. Badge di header menunjukkan mode aktif: "AI aktif (nama model)" atau "Aturan kata kunci (AI tidak aktif)".
+Ada satu jalur klasifikasi: LLM lewat `AI_API_KEY`. Tanpa key, `POST /api/complaints` gagal dengan HTTP 503 dan keluhan tidak disimpan. Untuk provider lain yang OpenAI-compatible, cukup ganti `AI_BASE_URL` dan `AI_MODEL`. Badge di header menunjukkan "AI aktif (nama model)" atau "AI tidak aktif".
 
 ## Perintah
 
@@ -125,7 +125,6 @@ Jalankan dari direktori `app/`.
 | Perintah | Fungsi |
 | --- | --- |
 | `npm run test` | Tes alur kerja dengan `node --test`. |
-| `node scripts/test-ai-heuristics.js` | Verifikasi heuristik klasifikasi aturan kata kunci. |
 | `npm run db:reset` | Hapus database SQLite lokal; dibuat ulang saat server start. |
 | `npm run build && npm start` | Build produksi lalu jalankan server. |
 

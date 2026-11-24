@@ -13,7 +13,6 @@ import {
   CHANNEL_LABELS,
   STATUS_LABELS,
   type ActivityLog,
-  type AiSource,
   type CategoryCode,
   type Channel,
   type Complaint,
@@ -25,7 +24,6 @@ import {
 
 export type {
   ActivityLog,
-  AiSource,
   CategoryCode,
   Channel,
   Complaint,
@@ -138,7 +136,6 @@ function mapComplaint(row: Row): Complaint {
     raw_text: String(row.raw_text),
     ai_category: nullableString(row.ai_category) as CategoryCode | undefined,
     ai_confidence: row.ai_confidence === null || row.ai_confidence === undefined ? undefined : Number(row.ai_confidence),
-    ai_source: nullableString(row.ai_source) as AiSource | undefined,
     ai_reason: nullableString(row.ai_reason),
     category: nullableString(row.category) as CategoryCode | undefined,
     department: nullableString(row.department) as DepartmentCode | undefined,
@@ -264,7 +261,6 @@ export interface NewComplaintInput {
   raw_text: string;
   ai_category: CategoryCode;
   ai_confidence: number;
-  ai_source: AiSource;
   ai_reason: string;
   summary: string;
   ai_response_raw?: unknown;
@@ -339,9 +335,9 @@ export function createComplaint(input: NewComplaintInput): Complaint {
   try {
     db.prepare(
       `INSERT INTO complaints
-         (id, guest_name, room_number, channel, raw_text, ai_category, ai_confidence, ai_source, ai_reason,
+         (id, guest_name, room_number, channel, raw_text, ai_category, ai_confidence, ai_reason,
           category, department, status, verified_by, verified_at, change_reason, created_by, created_at, updated_at, resolved_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, 'baru', NULL, NULL, NULL, ?, ?, ?, NULL)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, 'baru', NULL, NULL, NULL, ?, ?, ?, NULL)`
     ).run(
       id,
       input.guest_name ?? null,
@@ -350,7 +346,6 @@ export function createComplaint(input: NewComplaintInput): Complaint {
       input.raw_text,
       input.ai_category,
       input.ai_confidence,
-      input.ai_source,
       input.ai_reason,
       input.created_by ?? null,
       now,
@@ -512,7 +507,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'AC kamar 302 tidak dingin sejak tadi malam. Sudah saya laporkan dua kali ke front desk tetapi belum ada teknisi yang datang.',
     ai_category: 'teknisi',
     ai_confidence: 0.4,
-    ai_reason: 'Cocok dengan kata kunci: ac, tidak dingin.',
+    ai_reason: 'Keluhan menyebut AC kamar tidak dingin dan sudah dilaporkan dua kali tanpa tindak lanjut.',
     category: 'teknisi',
     department: 'engineering',
     status: 'diproses',
@@ -542,7 +537,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'Handuk di kamar mandi bernoda dan tidak diganti sejak kemarin. Tisu toilet juga habis dan belum diisi ulang.',
     ai_category: 'kebersihan',
     ai_confidence: 1,
-    ai_reason: 'Cocok dengan kata kunci: handuk, bernoda, diganti, kamar mandi.',
+    ai_reason: 'Keluhan menyebut handuk bernoda yang belum diganti serta tisu toilet habis di kamar mandi.',
     status: 'baru',
     created_by: 'user-staff',
     hoursAgo: 6,
@@ -563,7 +558,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'Sarapan yang saya pesan ke kamar sudah dingin saat tiba, telur juga tidak matang sesuai permintaan.',
     ai_category: 'fnb',
     ai_confidence: 0.8,
-    ai_reason: 'Cocok dengan kata kunci: sarapan, dingin, telur, matang.',
+    ai_reason: 'Keluhan menyebut sarapan room service dingin dan telur tidak matang sesuai permintaan.',
     category: 'fnb',
     department: 'fnb',
     status: 'selesai',
@@ -600,7 +595,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'Saya menunggu hampir 45 menit sebelum mendapat kunci kamar, tanpa penjelasan dari petugas mana pun.',
     ai_category: 'perlu_ditinjau',
     ai_confidence: 0.2,
-    ai_reason: 'Hanya 1 kata kunci yang cocok; keluhan perlu ditinjau petugas.',
+    ai_reason: 'Keluhan menyebut waktu tunggu panjang tanpa penjelasan petugas; konteksnya ambigu.',
     category: 'resepsionis',
     department: 'front_office',
     change_reason:
@@ -633,7 +628,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'Ada pesta berisik di kamar 414 sejak tengah malam. Kami sudah menelepon front desk tiga kali tetapi tidak ada yang menindak.',
     ai_category: 'perlu_ditinjau',
     ai_confidence: 0.2,
-    ai_reason: 'Hanya 1 kata kunci yang cocok; keluhan perlu ditinjau petugas.',
+    ai_reason: 'Keluhan kebisingan antar kamar tidak jelas masuk kategori operasional mana; perlu ditinjau.',
     status: 'baru',
     created_by: 'user-staff',
     hoursAgo: 2,
@@ -654,7 +649,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'Ada tagihan ganda untuk parkir dan room service di struk akhir saya. Mohon diperiksa sebelum check-out besok pagi.',
     ai_category: 'resepsionis',
     ai_confidence: 0.4,
-    ai_reason: 'Cocok dengan kata kunci: tagihan, check-out.',
+    ai_reason: 'Keluhan menyebut tagihan ganda parkir dan room service yang perlu diperiksa sebelum check-out.',
     category: 'resepsionis',
     department: 'front_office',
     status: 'selesai',
@@ -691,7 +686,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'Air panas di kamar mandi kamar 207 tidak keluar sejak pagi, keran hanya mengeluarkan air dingin.',
     ai_category: 'teknisi',
     ai_confidence: 0.4,
-    ai_reason: 'Cocok dengan kata kunci: air panas, keran.',
+    ai_reason: 'Keluhan menyebut air panas tidak keluar dan keran hanya mengeluarkan air dingin.',
     category: 'teknisi',
     department: 'engineering',
     status: 'diproses',
@@ -721,7 +716,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'Pintu lift sayap timur macet dan saya terjebak di dalamnya sekitar 10 menit. Tombol darurat juga tidak berfungsi.',
     ai_category: 'teknisi',
     ai_confidence: 0.6,
-    ai_reason: 'Cocok dengan kata kunci: lift, pintu, tidak berfungsi.',
+    ai_reason: 'Keluhan menyebut pintu lift macet dan tombol darurat tidak berfungsi; insiden keselamatan.',
     category: 'perlu_ditinjau',
     department: 'duty_manager',
     change_reason:
@@ -761,7 +756,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'Kolam renang tertutup tanpa pemberitahuan padahal saya memilih hotel ini karena fasilitasnya. Anak-anak kecewa sekali.',
     ai_category: 'perlu_ditinjau',
     ai_confidence: 0,
-    ai_reason: 'Tidak ada kata kunci yang cukup kuat; keluhan perlu ditinjau petugas.',
+    ai_reason: 'Keluhan tentang kolam renang yang ditutup tanpa pemberitahuan tidak masuk kategori operasional yang ada.',
     status: 'baru',
     created_by: 'user-staff',
     hoursAgo: 8,
@@ -782,7 +777,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'Kamar terasa apek dan handuk yang tersedia masih basah. Saya sudah menunggu housekeeping sejak pagi.',
     ai_category: 'kebersihan',
     ai_confidence: 0.4,
-    ai_reason: 'Cocok dengan kata kunci: apek, handuk.',
+    ai_reason: 'Keluhan menyebut kamar apek dan handuk basah; housekeeping belum datang sejak pagi.',
     category: 'kebersihan',
     department: 'housekeeping',
     status: 'diproses',
@@ -812,7 +807,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'Kopi di area lobi sudah habis sejak jam 7 pagi dan staf baru mengisi ulang setelah saya ingatkan dua kali.',
     ai_category: 'perlu_ditinjau',
     ai_confidence: 0.2,
-    ai_reason: 'Kata kunci saling bersaing (fnb, resepsionis); keluhan perlu ditinjau petugas.',
+    ai_reason: 'Keluhan menyebut kopi lobi habis dan staf lambat mengisi ulang; menyangkut stok F&B.',
     category: 'fnb',
     department: 'fnb',
     change_reason: 'Keluhan menyangkut stok dan penyajian kopi di lobi, ditangani tim F&B.',
@@ -850,7 +845,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'WiFi di kamar 433 sangat lambat dan sering terputus. Saya harus presentasi online jam 10.',
     ai_category: 'teknisi',
     ai_confidence: 0.4,
-    ai_reason: 'Cocok dengan kata kunci: wifi, terputus.',
+    ai_reason: 'Keluhan menyebut WiFi lambat dan sering terputus saat akan presentasi online.',
     category: 'teknisi',
     department: 'engineering',
     status: 'diproses',
@@ -879,7 +874,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
     raw_text: 'Pintu balkon kamar tidak bisa dikunci dan gagang pintunya longgar.',
     ai_category: 'teknisi',
     ai_confidence: 0.4,
-    ai_reason: 'Cocok dengan kata kunci: pintu, kunci.',
+    ai_reason: 'Keluhan menyebut pintu balkon tidak bisa dikunci dan gagang pintunya longgar.',
     status: 'baru',
     created_by: 'user-staff',
     hoursAgo: 10,
@@ -900,7 +895,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'Resepsionis tidak ramah saat saya menanyakan tagihan, jawabannya singkat dan terkesan mengabaikan saya.',
     ai_category: 'resepsionis',
     ai_confidence: 0.6,
-    ai_reason: 'Cocok dengan kata kunci: resepsionis, tidak ramah, tagihan.',
+    ai_reason: 'Keluhan menyebut resepsionis tidak ramah saat ditanya soal tagihan.',
     category: 'resepsionis',
     department: 'front_office',
     status: 'selesai',
@@ -937,7 +932,7 @@ const SEED_COMPLAINTS: SeedComplaint[] = [
       'Nasi goreng pesanan anak saya masih mentah dan rasanya hambar. Tolong diganti dengan yang matang.',
     ai_category: 'fnb',
     ai_confidence: 1,
-    ai_reason: 'Cocok dengan kata kunci: nasi, pesanan, mentah, rasa.',
+    ai_reason: 'Keluhan menyebut nasi goreng pesanan anak masih mentah dan rasanya hambar.',
     status: 'baru',
     created_by: 'user-staff',
     hoursAgo: 4,
@@ -969,9 +964,9 @@ function seedDatabase(db: DatabaseSync) {
 
   const insertComplaint = db.prepare(
     `INSERT INTO complaints
-       (id, guest_name, room_number, channel, raw_text, ai_category, ai_confidence, ai_source, ai_reason,
+       (id, guest_name, room_number, channel, raw_text, ai_category, ai_confidence, ai_reason,
         category, department, status, verified_by, verified_at, change_reason, created_by, created_at, updated_at, resolved_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const insertAnalysis = db.prepare(
     `INSERT INTO complaint_analysis (id, complaint_id, summary, ai_response_raw, created_at)
@@ -999,7 +994,6 @@ function seedDatabase(db: DatabaseSync) {
         seed.raw_text,
         seed.ai_category,
         seed.ai_confidence,
-        'rules',
         seed.ai_reason,
         seed.category ?? null,
         seed.department ?? null,
@@ -1021,7 +1015,6 @@ function seedDatabase(db: DatabaseSync) {
           kategori: seed.ai_category,
           confidence: seed.ai_confidence,
           alasan: seed.ai_reason,
-          sumber: 'rules',
         }),
         createdAt
       );

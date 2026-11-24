@@ -6,5 +6,4 @@
 | --- | --- |
 | [`PLAN.md`](PLAN.md) | Rencana produk: keputusan terkunci, arsitektur, kontrak domain dan classifier, fase eksekusi, keamanan, deployment, risiko, serta pemetaan ke deck. |
 | [`EVALUATION.md`](EVALUATION.md) | Spesifikasi evaluasi klasifikasi: dataset sintetis 200 item, aturan anotasi, prosedur tiga arah (rules/LLM/hybrid), dan template hasil. |
-| [`RULES.md`](RULES.md) | Spesifikasi classifier aturan kata kunci: daftar kata berbobot, ambang, tie-break, formula confidence, dan fixture. |
 | [`BLACKBOX.md`](BLACKBOX.md) | Template eksekusi 37 skenario black-box (BB-01..BB-37), seam pengujian, bukti, dan status. |

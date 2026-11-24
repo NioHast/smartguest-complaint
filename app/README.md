@@ -9,11 +9,13 @@ Jalankan dari direktori `app/`:
 
 ```bash
 npm install
-# salin .env.example menjadi .env, lalu isi AI_API_KEY bila ingin mode LLM
+# salin .env.example menjadi .env, lalu isi AI_API_KEY (wajib)
 npm run dev
 ```
 
 Buka `http://localhost:3000`, login dengan `staff@smartguest.local` / `password`.
+
+`AI_API_KEY` wajib diisi. Tanpa key, aplikasi tetap terbuka tetapi pencatatan keluhan gagal dengan HTTP 503.
 
 ## Perintah
 
@@ -28,6 +30,6 @@ Buka `http://localhost:3000`, login dengan `staff@smartguest.local` / `password`
 
 - Node.js >= 23.4.0 wajib karena memakai modul bawaan `node:sqlite`, yang tersedia tanpa flag sejak v23.4.0 (dan v22.13.0); versi ini dipilih sebagai batas aman. Node 24/26 direkomendasikan karena Node 23 bukan LTS.
 - Database SQLite berada di `data/` dan dibuat otomatis saat pertama kali dipakai.
-- Tanpa `AI_API_KEY`, klasifikasi memakai aturan kata kunci; aplikasi tetap berjalan.
+- Klasifikasi hanya memakai LLM lewat `AI_API_KEY`; tanpa key pencatatan keluhan ditolak (503).
 
 Dokumen lengkap (arsitektur, API, dan variabel lingkungan) ada di README root.

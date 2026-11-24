@@ -1,5 +1,7 @@
 # SmartGuest Complaint — Eksekusi Matriks Black-Box
 
+> Catatan implementasi: jalur klasifikasi aturan kata kunci dihapus; aplikasi hanya memakai LLM, dan tanpa API key pencatatan keluhan gagal (503).
+
 - Versi: 1.1
 - Tanggal: 4 November 2026
 - Status: template eksekusi; belum dijalankan

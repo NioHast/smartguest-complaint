@@ -35,7 +35,6 @@ CREATE TABLE IF NOT EXISTS complaints (
   ai_category TEXT
     CHECK (ai_category IN ('kebersihan', 'teknisi', 'fnb', 'resepsionis', 'perlu_ditinjau')),
   ai_confidence REAL,
-  ai_source TEXT CHECK (ai_source IN ('llm', 'rules', 'manual')),
   ai_reason TEXT,
   category TEXT
     CHECK (category IN ('kebersihan', 'teknisi', 'fnb', 'resepsionis', 'perlu_ditinjau')),
