@@ -56,7 +56,7 @@ npm install
 npm run dev
 ```
 
-Buka `http://localhost:3000`, lalu login dengan `staff@smartguest.local` / `password`.
+Buka `http://localhost:3000`, lalu login sebagai Intan Permata dengan `staff@smartguest.local` / `password`.
 
 `AI_API_KEY` wajib diisi; tanpa key aplikasi tetap terbuka, tetapi pencatatan keluhan gagal. Lihat [Variabel Lingkungan](#variabel-lingkungan).
 

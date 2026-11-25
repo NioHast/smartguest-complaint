@@ -123,7 +123,7 @@ export default function LoginPage() {
             >
               <span>
                 <span className="block text-[13px] font-medium text-[var(--ink)]">
-                  Humphrey Bogart
+                  Intan Permata
                 </span>
                 <span className="mt-0.5 block text-[11px] text-[var(--ink-muted)]">
                   staff@smartguest.local · kata sandi: password

@@ -439,9 +439,9 @@ export function updateStatus(id: string, status: ComplaintStatus, actor: string)
 const SEED_PASSWORD = 'password';
 
 const SEED_USERS = [
-  { id: 'user-admin', email: 'admin@smartguest.local', full_name: 'Audrey Hepburn' },
-  { id: 'user-manager', email: 'manager@smartguest.local', full_name: 'Gregory Peck' },
-  { id: 'user-staff', email: 'staff@smartguest.local', full_name: 'Humphrey Bogart' },
+  { id: 'user-admin', email: 'admin@smartguest.local', full_name: 'Ratna Puspita' },
+  { id: 'user-manager', email: 'manager@smartguest.local', full_name: 'Yusuf Maulana' },
+  { id: 'user-staff', email: 'staff@smartguest.local', full_name: 'Intan Permata' },
 ];
 
 function seedDatabase(db: DatabaseSync) {
