@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ChevronRight,
@@ -9,6 +10,7 @@ import {
   LayoutDashboard,
   LogOut,
   PlusCircle,
+  QrCode,
   Search,
   X,
 } from 'lucide-react';
@@ -625,6 +627,14 @@ export default function DashboardPage() {
                 </span>
               )}
             </button>
+
+            <Link
+              href="/qr"
+              className="flex w-auto items-center gap-2.5 border-l-2 border-l-transparent px-3 py-2 text-left text-[13px] font-medium text-[var(--ink-muted)] hover:text-[var(--ink)] lg:w-full"
+            >
+              <QrCode size={16} strokeWidth={1.5} />
+              <span>QR Kamar</span>
+            </Link>
           </nav>
         </div>
 
