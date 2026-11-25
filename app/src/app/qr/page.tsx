@@ -1,17 +1,22 @@
 // Halaman QR kamar (server component, tanpa sesi).
 //
-// QR dirender sebagai SVG inline di server memakai paket `qrcode`, sehingga
-// halaman bisa langsung dicetak tanpa JavaScript klien dan tanpa aset gambar.
+// Menerima daftar kamar lewat query `?kamar=101,102,305`. Setiap QR dirender
+// sebagai SVG inline di server memakai paket `qrcode`, sehingga halaman bisa
+// langsung dicetak tanpa JavaScript klien dan tanpa aset gambar.
 
 import QRCode from 'qrcode';
 import { headers } from 'next/headers';
 
-import { MAX_ROOM_NUMBER, normalizeRoomNumber } from '@/lib/validation';
+import { MAX_QR_ROOMS, parseRoomList } from '@/lib/rooms';
+import QrControls from './controls';
 
-function normalizeRoom(value: string | string[] | undefined): string {
-  const raw = Array.isArray(value) ? value[0] : value;
-  return normalizeRoomNumber(raw);
+interface RoomCard {
+  room: string;
+  guestUrl: string;
+  svg: string;
 }
+
+const QR_COLOR = { dark: '#1B1A17', light: '#FFFFFF' };
 
 export default async function QrPage({
   searchParams,
@@ -19,7 +24,7 @@ export default async function QrPage({
   searchParams: Promise<{ kamar?: string | string[] }>;
 }) {
   const params = await searchParams;
-  const roomNumber = normalizeRoom(params.kamar);
+  const { rooms, truncated } = parseRoomList(params.kamar);
 
   const requestHeaders = await headers();
 
@@ -37,70 +42,95 @@ export default async function QrPage({
     ? configuredBase.replace(/\/+$/, '')
     : `${proto}://${host}`;
 
-  const guestPath = roomNumber ? `/tamu?kamar=${encodeURIComponent(roomNumber)}` : '/tamu';
-  const guestUrl = `${baseUrl}${guestPath}`;
+  const cards: RoomCard[] = await Promise.all(
+    rooms.map(async (room) => {
+      const guestPath = `/tamu?kamar=${encodeURIComponent(room)}`;
+      const guestUrl = `${baseUrl}${guestPath}`;
+      const svg = await QRCode.toString(guestUrl, {
+        type: 'svg',
+        errorCorrectionLevel: 'M',
+        margin: 2,
+        width: 300,
+        color: QR_COLOR,
+      });
+      return { room, guestUrl, svg };
+    })
+  );
 
-  const qrSvg = await QRCode.toString(guestUrl, {
-    type: 'svg',
-    errorCorrectionLevel: 'M',
-    margin: 2,
-    width: 260,
-    color: { dark: '#1B1A17', light: '#FFFFFF' },
-  });
+  const isSingle = cards.length === 1;
+  const singleCard = isSingle ? cards[0] : null;
 
   return (
-    <main className="flex min-h-screen w-full items-center justify-center bg-[var(--paper)] px-4 py-10 sm:px-6">
-      <div className="w-full max-w-2xl">
-        <h1 className="sr-only">QR Form Tamu Kamar {roomNumber || '(tanpa nomor kamar)'}</h1>
-        <p className="eyebrow">SmartGuest · QR Kamar</p>
+    <main className="qr-page min-h-screen w-full bg-[var(--paper)] px-4 py-8 sm:px-6 sm:py-10">
+      <div className="mx-auto w-full max-w-6xl">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="eyebrow">SmartGuest · QR Kamar</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-[var(--ink)] sm:text-3xl">
+              QR Kamar
+            </h1>
+            <p className="mt-1.5 text-sm leading-relaxed text-[var(--ink-muted)]">
+              Cetak dan tempel di kamar. Tamu memindai untuk melapor.
+            </p>
+          </div>
+          <p className="text-xs font-semibold text-[var(--ink-muted)]">
+            {cards.length} kamar
+          </p>
+        </div>
 
-        <div className="panel mt-4 p-6 sm:p-8">
-          <div className="flex flex-col gap-8 sm:flex-row sm:items-start">
-            <div className="flex flex-col items-center gap-3">
-              <div
-                className="rounded-[4px] border border-[var(--line)] bg-[var(--surface)] p-3"
-                // SVG dihasilkan sendiri oleh paket `qrcode`, bukan input pengguna.
-                dangerouslySetInnerHTML={{ __html: qrSvg }}
-              />
-              <p className="max-w-[260px] break-all text-center font-mono text-[10px] leading-relaxed text-[var(--ink-muted)]">
-                {guestUrl}
-              </p>
-            </div>
+        {truncated && (
+          <p
+            className="mt-3 rounded-[var(--radius-control)] border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--ink-muted)]"
+            role="status"
+          >
+            {`Menampilkan ${MAX_QR_ROOMS} kamar pertama`}
+          </p>
+        )}
 
-            <div className="min-w-0 flex-1">
+        <QrControls key={rooms.join(',')} initialRooms={rooms.join(',')} />
+
+        {singleCard ? (
+          <article className="qr-card qr-card-single panel mt-6 flex flex-col items-center gap-6 p-6 sm:flex-row sm:items-start sm:p-8">
+            <div
+              className="qr-code shrink-0 rounded-[4px] border border-[var(--line)] bg-[var(--surface)] p-3 [&>svg]:h-[200px] [&>svg]:w-[200px] sm:[&>svg]:h-[220px] sm:[&>svg]:w-[220px]"
+              // SVG dihasilkan sendiri oleh paket `qrcode`, bukan input pengguna.
+              dangerouslySetInnerHTML={{ __html: singleCard.svg }}
+            />
+            <div className="min-w-0 flex-1 text-center sm:text-left">
               <p className="eyebrow">Nomor Kamar</p>
               <p className="mt-1 text-5xl font-semibold leading-none tracking-tight text-[var(--ink)] [font-variant-numeric:tabular-nums]">
-                {roomNumber || '—'}
+                {singleCard.room}
               </p>
-
               <p className="mt-4 text-sm leading-relaxed text-[var(--ink-muted)]">
                 Cetak dan tempel di kamar. Tamu memindai untuk melapor.
               </p>
-
-              <form action="/qr" method="get" className="mt-6 space-y-2">
-                <label className="block">
-                  <span className="eyebrow">Ganti Nomor Kamar</span>
-                  <input
-                    type="text"
-                    name="kamar"
-                    defaultValue={roomNumber}
-                    maxLength={MAX_ROOM_NUMBER}
-                    pattern="[A-Za-z0-9-]*"
-                    placeholder="mis. 302"
-                    className="field mt-1.5 w-full"
-                  />
-                </label>
-                <button type="submit" className="btn btn-primary btn-block">
-                  Tampilkan QR
-                </button>
-              </form>
-
-              <a href={guestPath} className="btn btn-quiet btn-block mt-2">
-                Buka form tamu
-              </a>
+              <p className="qr-url mt-4 break-all font-mono text-[10px] leading-relaxed text-[var(--ink-muted)]">
+                {singleCard.guestUrl}
+              </p>
             </div>
+          </article>
+        ) : (
+          <div className="qr-grid mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {cards.map((card) => (
+              <article
+                key={card.room}
+                className="qr-card panel flex flex-col items-center gap-2.5 break-inside-avoid p-3 text-center"
+              >
+                <div
+                  className="qr-code rounded-[4px] border border-[var(--line)] bg-[var(--surface)] p-2 [&>svg]:h-[150px] [&>svg]:w-[150px]"
+                  // SVG dihasilkan sendiri oleh paket `qrcode`, bukan input pengguna.
+                  dangerouslySetInnerHTML={{ __html: card.svg }}
+                />
+                <p className="text-xl font-semibold leading-none tracking-tight text-[var(--ink)] [font-variant-numeric:tabular-nums]">
+                  {card.room}
+                </p>
+                <p className="qr-url w-full break-all font-mono text-[9px] leading-snug text-[var(--ink-muted)]">
+                  {card.guestUrl}
+                </p>
+              </article>
+            ))}
           </div>
-        </div>
+        )}
       </div>
     </main>
   );

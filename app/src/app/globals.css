@@ -335,3 +335,92 @@ body {
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Cetak QR kamar
+   --------------------------------------------------------------------------- */
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  aside,
+  header,
+  nav,
+  .qr-controls,
+  .btn,
+  a {
+    display: none !important;
+  }
+
+  .qr-page {
+    min-height: auto !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .qr-page .panel,
+  .qr-card {
+    background: #ffffff !important;
+    border-color: #000000 !important;
+    box-shadow: none !important;
+  }
+
+  .qr-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 45mm) !important;
+    gap: 5mm !important;
+    justify-content: start !important;
+    margin-top: 6mm !important;
+  }
+
+  .qr-card {
+    width: 45mm !important;
+    box-sizing: border-box;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .qr-card-single {
+    width: auto !important;
+    max-width: 90mm;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .qr-card .qr-code {
+    padding: 1mm !important;
+    border-color: #000000 !important;
+  }
+
+  .qr-card .qr-code svg {
+    display: block;
+    width: 39mm !important;
+    height: 39mm !important;
+  }
+
+  .qr-card-single .qr-code svg {
+    width: 45mm !important;
+    height: 45mm !important;
+  }
+
+  .qr-url {
+    display: none !important;
+  }
+
+  .eyebrow,
+  p,
+  h1,
+  span {
+    color: #000000 !important;
+  }
+}
