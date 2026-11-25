@@ -9,10 +9,13 @@ import { randomUUID, randomBytes } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 
 import { hashPassword } from './password';
-import { hoursAgoIso, SEED_COMPLAINTS } from './seed-data';
+import { hoursAgoIso, SEED_COMPLAINTS, seedComplaintId } from './seed-data';
+import { CATEGORY_TO_DEPARTMENT, canTransition } from './workflow';
 import {
+  CATEGORIES,
   CHANNEL_LABELS,
   STATUS_LABELS,
+  categoryLabel,
   type ActivityLog,
   type CategoryCode,
   type Channel,
@@ -251,7 +254,7 @@ export interface VerificationUpdate {
   category: CategoryCode;
   department: DepartmentCode;
   actor: string;
-  action: 'verifikasi_terima' | 'verifikasi_ubah';
+  action: 'verifikasi_ubah';
   detail: string;
   change_reason?: string | null;
 }
@@ -303,10 +306,25 @@ export function getComplaintDetails(
   };
 }
 
+/**
+ * Menurunkan departemen penanggung jawab dari kategori. Satu sumber aturan
+ * tetap `CATEGORY_TO_DEPARTMENT` di `workflow.ts`; helper ini hanya
+ * mempersempit tipe agar pemanggil tidak perlu mengulang pemetaan.
+ */
+export function departmentForCategory(category: CategoryCode): DepartmentCode {
+  return CATEGORY_TO_DEPARTMENT[category];
+}
+
 export function createComplaint(input: NewComplaintInput): Complaint {
   const db = getDb();
   const id = randomUUID();
   const now = new Date().toISOString();
+
+  // Semua jalur create mengisi kategori dan departemen otomatis dari hasil
+  // klasifikasi AI. Tidak ada lagi baris dengan kategori NULL; petugas hanya
+  // mengoreksi bila hasil AI tidak tepat.
+  const category = input.ai_category;
+  const department = departmentForCategory(input.ai_category);
 
   db.exec('BEGIN');
   try {
@@ -314,7 +332,7 @@ export function createComplaint(input: NewComplaintInput): Complaint {
       `INSERT INTO complaints
          (id, guest_name, room_number, channel, raw_text, ai_category, ai_confidence, ai_reason,
           category, department, status, verified_by, verified_at, change_reason, created_by, created_at, updated_at, resolved_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, 'baru', NULL, NULL, NULL, ?, ?, ?, NULL)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'baru', NULL, NULL, NULL, ?, ?, ?, NULL)`
     ).run(
       id,
       input.guest_name ?? null,
@@ -324,6 +342,8 @@ export function createComplaint(input: NewComplaintInput): Complaint {
       input.ai_category,
       input.ai_confidence,
       input.ai_reason,
+      category,
+      department,
       input.created_by ?? null,
       now,
       now
@@ -394,11 +414,12 @@ export function updateStatus(id: string, status: ComplaintStatus, actor: string)
 
   const current = mapComplaint(existing);
 
-  // Pengaman di lapisan data: keluhan tanpa kategori belum terverifikasi dan
-  // tidak boleh langsung diselesaikan, terlepas dari pemanggilnya.
-  if (status === 'selesai' && !current.category) {
+  // Status hanya boleh bergerak sesuai `ALLOWED_TRANSITIONS`
+  // (baru -> diproses -> selesai). Verifikasi bukan lagi syarat, tetapi
+  // `baru -> selesai` tetap ditolak karena harus melewati `diproses`.
+  if (!canTransition(current.status, status)) {
     throw new StatusGuardError(
-      'Keluhan harus diverifikasi (memiliki kategori) sebelum dapat diselesaikan.'
+      `Transisi status dari ${STATUS_LABELS[current.status]} ke ${STATUS_LABELS[status]} tidak diizinkan.`
     );
   }
 
@@ -444,6 +465,119 @@ const SEED_USERS = [
   { id: 'user-staff', email: 'staff@smartguest.local', full_name: 'Intan Permata' },
 ];
 
+type SeedMode = 'static' | 'ai';
+
+interface SeedAiItem {
+  category: CategoryCode;
+  confidence: number;
+  reason: string;
+}
+
+/** Lokasi hasil klasifikasi AI yang dibekukan; ditulis oleh `scripts/seed-ai.mjs`. */
+const AI_SEED_FILE = path.join(DATA_DIR, 'seed-ai.json');
+const AI_SEED_HINT = 'Jalankan npm run seed:ai terlebih dahulu.';
+
+/**
+ * `SEED_MODE` menentukan sumber nilai `ai_*` saat database kosong:
+ * - `static` (default): nilai literal di `seed-data.ts`, tanpa panggilan AI.
+ * - `ai`: hasil beku di `data/seed-ai.json` (wajib ada dan lengkap).
+ *
+ * Nilai lain ditolak agar tidak ada fallback diam-diam ke jalur statis.
+ */
+function resolveSeedMode(): SeedMode {
+  const raw = process.env.SEED_MODE?.trim().toLowerCase();
+  if (!raw || raw === 'static') return 'static';
+  if (raw === 'ai') return 'ai';
+  throw new Error(
+    `SEED_MODE="${process.env.SEED_MODE}" tidak dikenal. Gunakan "static" (default) atau "ai".`
+  );
+}
+
+function isSeedAiItem(value: unknown): value is SeedAiItem {
+  if (!value || typeof value !== 'object') return false;
+  const item = value as Record<string, unknown>;
+  return (
+    typeof item.category === 'string' &&
+    (CATEGORIES as readonly string[]).includes(item.category) &&
+    typeof item.confidence === 'number' &&
+    Number.isFinite(item.confidence) &&
+    item.confidence >= 0 &&
+    item.confidence <= 1 &&
+    typeof item.reason === 'string' &&
+    item.reason.trim().length > 0
+  );
+}
+
+/**
+ * Membaca dan memvalidasi `data/seed-ai.json`. Sinkron karena dipanggil dari
+ * `seedDatabase`, yang sendiri dipanggil dari `getDb()`.
+ */
+function loadAiSeedItems(): Map<string, SeedAiItem> {
+  let raw: string;
+  try {
+    raw = fs.readFileSync(AI_SEED_FILE, 'utf8');
+  } catch {
+    throw new Error(`SEED_MODE=ai: data/seed-ai.json tidak ditemukan. ${AI_SEED_HINT}`);
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error(`SEED_MODE=ai: data/seed-ai.json bukan JSON valid. ${AI_SEED_HINT}`);
+  }
+
+  const items = (parsed as { items?: unknown } | null)?.items;
+  if (!items || typeof items !== 'object' || Array.isArray(items)) {
+    throw new Error(`SEED_MODE=ai: data/seed-ai.json tidak memuat objek "items". ${AI_SEED_HINT}`);
+  }
+
+  const byId = new Map<string, SeedAiItem>();
+  const missing: string[] = [];
+
+  SEED_COMPLAINTS.forEach((_, index) => {
+    const id = seedComplaintId(index);
+    const item = (items as Record<string, unknown>)[id];
+    if (item === undefined) {
+      missing.push(id);
+      return;
+    }
+    if (!isSeedAiItem(item)) {
+      throw new Error(
+        `SEED_MODE=ai: entri "${id}" di data/seed-ai.json tidak valid ` +
+          `(butuh category, confidence 0..1, dan reason). ${AI_SEED_HINT}`
+      );
+    }
+    byId.set(id, {
+      category: item.category,
+      confidence: item.confidence,
+      reason: item.reason,
+    });
+  });
+
+  if (missing.length > 0) {
+    throw new Error(
+      `SEED_MODE=ai: data/seed-ai.json tidak lengkap untuk ${missing.length} dari ` +
+        `${SEED_COMPLAINTS.length} keluhan (${missing.join(', ')}). ${AI_SEED_HINT}`
+    );
+  }
+
+  return byId;
+}
+
+/**
+ * Teks log `verifikasi_ubah` dibangun dari nilai yang benar-benar disimpan
+ * (`ai_category` dan kategori final), bukan literal seed. Dengan begitu jalur
+ * `SEED_MODE=ai` tidak menghasilkan log yang kontradiktif bila kategori AI
+ * berbeda dari asumsi data statis.
+ */
+function verifikasiUbahDetail(aiCategory: CategoryCode, category: CategoryCode | null): string {
+  if (category === null || aiCategory === category) {
+    return `Meninjau ulang kategori ${categoryLabel(category ?? aiCategory)}; keputusan petugas tetap.`;
+  }
+  return `Mengubah kategori dari ${categoryLabel(aiCategory)} menjadi ${categoryLabel(category)}.`;
+}
+
 function seedDatabase(db: DatabaseSync) {
   const userCount = db.prepare('SELECT COUNT(*) AS count FROM users').get() as { count: number };
   if (Number(userCount.count) === 0) {
@@ -458,6 +592,9 @@ function seedDatabase(db: DatabaseSync) {
 
   const complaintCount = db.prepare('SELECT COUNT(*) AS count FROM complaints').get() as { count: number };
   if (Number(complaintCount.count) > 0) return;
+
+  const seedMode = resolveSeedMode();
+  const aiItems = seedMode === 'ai' ? loadAiSeedItems() : null;
 
   const insertComplaint = db.prepare(
     `INSERT INTO complaints
@@ -476,12 +613,38 @@ function seedDatabase(db: DatabaseSync) {
   db.exec('BEGIN');
   try {
     SEED_COMPLAINTS.forEach((seed, index) => {
-      const id = `complaint-seed-${String(index + 1).padStart(2, '0')}`;
+      const id = seedComplaintId(index);
+      const ai = aiItems?.get(id);
+
+      // Tiga keluhan dengan `change_reason` adalah skenario koreksi petugas:
+      // nilai ai_* literal dipertahankan agar rekomendasi AI dijamin berbeda
+      // dari kategori final, termasuk saat SEED_MODE=ai. Untuk keluhan lain,
+      // hasil beku AI (bila ada) menggantikan nilai statis.
+      const useFrozenAi = ai !== undefined && !seed.change_reason;
+      const aiCategory = useFrozenAi ? ai.category : seed.ai_category;
+      const aiConfidence = useFrozenAi ? ai.confidence : seed.ai_confidence;
+      const aiReason = useFrozenAi ? ai.reason : seed.ai_reason;
+
+      // Semua seed sudah punya kategori & departemen otomatis. Hanya baris
+      // yang dikoreksi petugas (change_reason) yang mempertahankan kategori
+      // final statis; sisanya mengikuti hasil klasifikasi.
+      let category = seed.category;
+      let department = seed.department;
+      if (useFrozenAi) {
+        category = aiCategory;
+        department = CATEGORY_TO_DEPARTMENT[aiCategory];
+      }
+
       const createdAt = hoursAgoIso(seed.hoursAgo);
       const verifiedAt =
-        seed.verifiedHoursAgo !== undefined && seed.category ? hoursAgoIso(seed.verifiedHoursAgo) : null;
+        seed.verifiedHoursAgo !== undefined ? hoursAgoIso(seed.verifiedHoursAgo) : null;
       const resolvedAt = seed.resolvedHoursAgo !== undefined ? hoursAgoIso(seed.resolvedHoursAgo) : null;
       const verifiedBy = verifiedAt ? seed.logs.find((log) => log.action.startsWith('verifikasi_'))?.actor ?? null : null;
+      // `updated_at` mengikuti aktivitas terakhir (pembuatan, perubahan status,
+      // atau koreksi), bukan sekadar createdAt.
+      const updatedAt = hoursAgoIso(
+        Math.min(seed.hoursAgo, ...seed.logs.map((log) => log.hoursAgo))
+      );
 
       insertComplaint.run(
         id,
@@ -489,18 +652,18 @@ function seedDatabase(db: DatabaseSync) {
         seed.room_number,
         seed.channel,
         seed.raw_text,
-        seed.ai_category,
-        seed.ai_confidence,
-        seed.ai_reason,
-        seed.category ?? null,
-        seed.department ?? null,
+        aiCategory,
+        aiConfidence,
+        aiReason,
+        category,
+        department,
         seed.status,
         verifiedBy,
         verifiedAt,
         seed.change_reason ?? null,
         seed.created_by,
         createdAt,
-        resolvedAt ?? verifiedAt ?? createdAt,
+        updatedAt,
         resolvedAt
       );
 
@@ -508,9 +671,9 @@ function seedDatabase(db: DatabaseSync) {
         `analysis-seed-${String(index + 1).padStart(2, '0')}`,
         id,
         JSON.stringify({
-          kategori: seed.ai_category,
-          confidence: seed.ai_confidence,
-          alasan: seed.ai_reason,
+          kategori: aiCategory,
+          confidence: aiConfidence,
+          alasan: aiReason,
         }),
         createdAt
       );
@@ -521,7 +684,7 @@ function seedDatabase(db: DatabaseSync) {
           id,
           log.actor,
           log.action,
-          log.detail,
+          log.action === 'verifikasi_ubah' ? verifikasiUbahDetail(aiCategory, category) : log.detail,
           hoursAgoIso(log.hoursAgo)
         );
       });

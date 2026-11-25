@@ -131,8 +131,13 @@ function StatusBadge({ status }: { status: ComplaintStatus }) {
   );
 }
 
+/** Penanda netral untuk keluhan yang dicatat tamu lewat QR tanpa sesi petugas. */
+function GuestBadge() {
+  return <span className="badge badge-neutral">Tamu</span>;
+}
+
 // ---------------------------------------------------------------------------
-// Panel verifikasi (dipakai di panel rekomendasi dan panel detail)
+// Panel kategori (dipakai di panel rekomendasi dan panel detail)
 // ---------------------------------------------------------------------------
 
 function VerificationPanel({
@@ -151,18 +156,6 @@ function VerificationPanel({
   const [busy, setBusy] = useState(false);
 
   const isFinalized = complaint.status === 'selesai';
-
-  const handleAccept = async () => {
-    setBusy(true);
-    setError(null);
-    const result = await patchComplaint(complaint.id, { action: 'accept' });
-    setBusy(false);
-    if (result.error || !result.complaint) {
-      setError(result.error || 'Gagal menerima rekomendasi.');
-      return;
-    }
-    onUpdated(result.complaint);
-  };
 
   const handleChange = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -202,6 +195,12 @@ function VerificationPanel({
           </dd>
         </div>
         <div className="detail-row py-2">
+          <dt className="detail-label">Departemen</dt>
+          <dd className="text-[13px] font-medium text-[var(--ink)]">
+            {departmentLabel(complaint.department)}
+          </dd>
+        </div>
+        <div className="detail-row py-2">
           <dt className="detail-label">Keyakinan</dt>
           <dd className="text-[13px] font-medium tabular-nums text-[var(--ink)]">
             {confidencePercent(complaint.ai_confidence)}
@@ -215,44 +214,35 @@ function VerificationPanel({
         </div>
       </dl>
 
-      {complaint.category ? (
+      {complaint.category && (
         <div className="mt-3 border-t border-[var(--line)] pt-3">
-          <p className="eyebrow">Hasil verifikasi petugas</p>
+          <p className="eyebrow">Kategori terpilih</p>
           <p className="mt-2 text-[13px] font-medium text-[var(--ink)]">
             {categoryLabel(complaint.category)} → {departmentLabel(complaint.department)}
           </p>
-          <p className="mt-1 text-[11px] text-[var(--ink-muted)]">
-            Oleh {complaint.verified_by || '-'} · {formatDateTime(complaint.verified_at)}
+          <p className="mt-1 text-[11px] leading-relaxed text-[var(--ink-muted)]">
+            Kategori terisi otomatis. Koreksi bila perlu.
           </p>
+          {complaint.verified_by && (
+            <p className="mt-1 text-[11px] text-[var(--ink-muted)]">
+              Ditangani oleh {complaint.verified_by} · {formatDateTime(complaint.verified_at)}
+            </p>
+          )}
           {complaint.change_reason && (
             <p className="mt-1 text-[11px] leading-relaxed text-[var(--ink-muted)]">
               Alasan perubahan: {complaint.change_reason}
             </p>
           )}
         </div>
-      ) : (
-        !isFinalized && (
-          <div className="flex gap-2 pt-3">
-            <button onClick={handleAccept} disabled={busy} className="btn btn-primary flex-1">
-              Terima
-            </button>
-            <button
-              onClick={() => setShowChange((value) => !value)}
-              disabled={busy}
-              className="btn btn-secondary flex-1"
-            >
-              Ubah Kategori
-            </button>
-          </div>
-        )
       )}
 
-      {complaint.category && !isFinalized && (
+      {!isFinalized && (
         <button
           onClick={() => setShowChange((value) => !value)}
-          className="btn btn-secondary btn-block mt-3"
+          disabled={busy}
+          className={`btn btn-block mt-3 ${complaint.category ? 'btn-secondary' : 'btn-primary'}`}
         >
-          Ubah Kategori
+          Koreksi kategori
         </button>
       )}
 
@@ -466,7 +456,7 @@ export default function DashboardPage() {
     setNotice({ type: 'ok', text: 'Keluhan berhasil diperbarui.' });
     window.setTimeout(() => setNotice(null), 3000);
     if (details?.complaint.id === updated.id) {
-      // Muat ulang jejak aktivitas setelah verifikasi/pindah status.
+      // Muat ulang jejak aktivitas setelah koreksi/pindah status.
       apiFetch<ComplaintDetails>(`/api/complaints/${updated.id}`, { cache: 'no-store' }).then(
         (result) => {
           if (result.ok && result.data) setDetails(result.data);
@@ -526,8 +516,8 @@ export default function DashboardPage() {
   // ---------------------------------------------------------------------
   const total = complaints.length;
   const countByStatus = (status: ComplaintStatus) => complaints.filter((item) => item.status === status).length;
-  // Samakan dengan grafik kategori: yang dihitung adalah kategori hasil
-  // verifikasi petugas, bukan rekomendasi AI.
+  // Samakan dengan grafik kategori: yang dihitung adalah kategori final,
+  // bukan rekomendasi AI.
   const perluDitinjau = complaints.filter((item) => item.category === 'perlu_ditinjau').length;
   // Keluhan tanpa kategori petugas tidak masuk grafik kategori; jumlahnya
   // ditampilkan sebagai keterangan kecil di bawah judul grafik.
@@ -839,7 +829,12 @@ export default function DashboardPage() {
                               <td className="font-medium tabular-nums text-[var(--ink)]">
                                 {item.room_number || '-'}
                               </td>
-                              <td className="text-[var(--ink-muted)]">{channelLabel(item.channel)}</td>
+                              <td className="text-[var(--ink-muted)]">
+                                <span className="inline-flex items-center gap-1.5">
+                                  {channelLabel(item.channel)}
+                                  {item.created_by === 'guest' && <GuestBadge />}
+                                </span>
+                              </td>
                               <td className="max-w-[320px] truncate text-[var(--ink-muted)]">
                                 {item.raw_text}
                               </td>
@@ -867,16 +862,13 @@ export default function DashboardPage() {
               <section className="panel p-6">
                 <h2 className="text-base font-semibold text-[var(--ink)]">Catat Keluhan Tamu</h2>
                 <p className="mt-2 text-xs leading-relaxed text-[var(--ink-muted)]">
-                  Tulis keluhan apa adanya. Sistem akan mengklasifikasikan ke salah satu dari lima kategori,
-                  lalu petugas memverifikasi sebelum departemen ditentukan.
+                  Tulis keluhan apa adanya. Sistem mengisi kategori dan departemen secara otomatis;
+                  petugas dapat mengoreksi bila perlu.
                 </p>
 
                 {aiUnavailable && (
-                  <div
-                    role="alert"
-                    className="mt-4 rounded-[4px] border border-[var(--warn)] px-3 py-2 text-xs font-medium leading-relaxed text-[var(--warn)]"
-                  >
-                    Klasifikasi AI belum dikonfigurasi. Isi AI_API_KEY di app/.env lalu restart server.
+                  <div className="mt-4 rounded-[4px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2 text-xs leading-relaxed text-[var(--ink-muted)]">
+                    AI sedang tidak aktif. Keluhan tetap disimpan dan ditandai Perlu Ditinjau.
                   </div>
                 )}
 
@@ -942,7 +934,7 @@ export default function DashboardPage() {
 
                   <button
                     type="submit"
-                    disabled={submitting || aiUnavailable}
+                    disabled={submitting}
                     className="btn btn-primary btn-block"
                   >
                     {submitting ? 'Mengklasifikasikan...' : 'Simpan & Klasifikasikan'}
@@ -1081,8 +1073,9 @@ export default function DashboardPage() {
                               <p className="max-w-[140px] truncate text-[13px] font-medium text-[var(--ink)]">
                                 {item.guest_name || 'Tamu'}
                               </p>
-                              <p className="mt-0.5 text-[11px] uppercase tracking-[0.04em] text-[var(--ink-muted)]">
-                                {channelLabel(item.channel)}
+                              <p className="mt-0.5 flex items-center gap-1.5 text-[11px] uppercase tracking-[0.04em] text-[var(--ink-muted)]">
+                                <span>{channelLabel(item.channel)}</span>
+                                {item.created_by === 'guest' && <GuestBadge />}
                               </p>
                             </td>
                             <td>
@@ -1166,9 +1159,12 @@ export default function DashboardPage() {
           ) : (
             <div className="flex-1 space-y-5 overflow-y-auto p-5">
               <div className="border-b border-[var(--line)] pb-4">
-                <p className="truncate text-sm font-medium text-[var(--ink)]">
-                  {details.complaint.guest_name || 'Tamu'}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="truncate text-sm font-medium text-[var(--ink)]">
+                    {details.complaint.guest_name || 'Tamu'}
+                  </p>
+                  {details.complaint.created_by === 'guest' && <GuestBadge />}
+                </div>
                 <p className="mt-1 text-[11px] text-[var(--ink-muted)]">
                   Kamar {details.complaint.room_number || '-'} · {channelLabel(details.complaint.channel)}
                 </p>

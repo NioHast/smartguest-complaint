@@ -5,7 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 export const metadata: Metadata = {
   title: "SmartGuest | Manajemen Keluhan Tamu",
   description:
-    "Catat keluhan tamu, klasifikasikan otomatis ke lima kategori, verifikasi petugas, dan pantau penyelesaian per departemen.",
+    "Catat keluhan tamu, klasifikasikan otomatis ke lima kategori, koreksi kategori oleh petugas, dan pantau penyelesaian per departemen.",
   keywords: ["operasional hotel", "manajemen keluhan", "tamu hotel", "dasbor hotel"],
   authors: [{ name: "Tim SmartGuest" }],
   icons: {

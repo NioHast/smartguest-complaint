@@ -9,12 +9,26 @@
 
 import type { CategoryCode, Channel, ComplaintStatus, DepartmentCode } from './types';
 
-interface SeedLog {
-  action: string;
-  detail: string;
+interface SeedLogBase {
   actor: string;
   hoursAgo: number;
 }
+
+/**
+ * Log dengan detail statis. `verifikasi_ubah` sengaja tidak punya `detail`:
+ * teksnya dibangun `db.ts` dari `ai_category` dan kategori final yang benar-benar
+ * tersimpan, supaya tidak kontradiktif saat `SEED_MODE=ai`.
+ */
+interface SeedLogWithDetail extends SeedLogBase {
+  action: 'keluhan_dicatat' | 'status_diubah';
+  detail: string;
+}
+
+interface SeedLogVerifikasiUbah extends SeedLogBase {
+  action: 'verifikasi_ubah';
+}
+
+type SeedLog = SeedLogWithDetail | SeedLogVerifikasiUbah;
 
 interface SeedComplaint {
   guest_name: string;
@@ -24,10 +38,16 @@ interface SeedComplaint {
   ai_category: CategoryCode;
   ai_confidence: number;
   ai_reason: string;
-  category?: CategoryCode;
-  department?: DepartmentCode;
+  /**
+   * Kategori final yang tersimpan. Semua jalur create mengisi kategori
+   * otomatis, jadi setiap keluhan seed wajib punya nilai ini (tidak ada lagi
+   * keadaan "belum diverifikasi").
+   */
+  category: CategoryCode;
+  department: DepartmentCode;
   change_reason?: string;
   status: ComplaintStatus;
+  /** `'guest'` untuk keluhan yang dicatat tamu lewat kanal QR; selain itu id petugas. */
   created_by: string;
   hoursAgo: number;
   verifiedHoursAgo?: number;
@@ -37,6 +57,15 @@ interface SeedComplaint {
 
 export function hoursAgoIso(hours: number): string {
   return new Date(Date.now() - hours * 3600 * 1000).toISOString();
+}
+
+/**
+ * ID deterministik untuk baris seed ke-`index` (0-based). Dipakai `db.ts` saat
+ * menulis database dan `scripts/seed-ai.mjs` saat membekukan hasil klasifikasi,
+ * supaya kunci `data/seed-ai.json` selalu cocok dengan baris yang di-seed.
+ */
+export function seedComplaintId(index: number): string {
+  return `complaint-seed-${String(index + 1).padStart(2, '0')}`;
 }
 
 export const SEED_COMPLAINTS: SeedComplaint[] = [
@@ -54,7 +83,6 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
     status: 'diproses',
     created_by: 'user-staff',
     hoursAgo: 9,
-    verifiedHoursAgo: 7,
     logs: [
       {
         action: 'keluhan_dicatat',
@@ -63,8 +91,8 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
         hoursAgo: 9,
       },
       {
-        action: 'verifikasi_terima',
-        detail: 'Menerima rekomendasi AI: Teknisi & Fasilitas → Engineering.',
+        action: 'status_diubah',
+        detail: 'Status diubah dari Baru menjadi Diproses.',
         actor: 'Yusuf Maulana',
         hoursAgo: 7,
       },
@@ -79,6 +107,8 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
     ai_category: 'kebersihan',
     ai_confidence: 1,
     ai_reason: 'Keluhan menyebut handuk bernoda yang belum diganti serta tisu toilet habis di kamar mandi.',
+    category: 'kebersihan',
+    department: 'housekeeping',
     status: 'baru',
     created_by: 'user-staff',
     hoursAgo: 6,
@@ -105,7 +135,6 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
     status: 'selesai',
     created_by: 'user-manager',
     hoursAgo: 30,
-    verifiedHoursAgo: 28,
     resolvedHoursAgo: 26,
     logs: [
       {
@@ -115,8 +144,8 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
         hoursAgo: 30,
       },
       {
-        action: 'verifikasi_terima',
-        detail: 'Menerima rekomendasi AI: Makanan & Minuman → F&B.',
+        action: 'status_diubah',
+        detail: 'Status diubah dari Baru menjadi Diproses.',
         actor: 'Intan Permata',
         hoursAgo: 28,
       },
@@ -154,8 +183,6 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
       },
       {
         action: 'verifikasi_ubah',
-        detail:
-          'Mengubah kategori dari Perlu Ditinjau ke Resepsionis (Front Office). Alasan: antrean check-in.',
         actor: 'Yusuf Maulana',
         hoursAgo: 2,
       },
@@ -170,6 +197,8 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
     ai_category: 'perlu_ditinjau',
     ai_confidence: 0.2,
     ai_reason: 'Keluhan kebisingan antar kamar tidak jelas masuk kategori operasional mana; perlu ditinjau.',
+    category: 'perlu_ditinjau',
+    department: 'duty_manager',
     status: 'baru',
     created_by: 'user-staff',
     hoursAgo: 2,
@@ -196,7 +225,6 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
     status: 'selesai',
     created_by: 'user-manager',
     hoursAgo: 48,
-    verifiedHoursAgo: 46,
     resolvedHoursAgo: 44,
     logs: [
       {
@@ -206,8 +234,8 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
         hoursAgo: 48,
       },
       {
-        action: 'verifikasi_terima',
-        detail: 'Menerima rekomendasi AI: Resepsionis → Front Office.',
+        action: 'status_diubah',
+        detail: 'Status diubah dari Baru menjadi Diproses.',
         actor: 'Yusuf Maulana',
         hoursAgo: 46,
       },
@@ -222,7 +250,9 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
   {
     guest_name: 'Agus Setiawan',
     room_number: '207',
-    channel: 'front_desk',
+    // Keluhan tamu lewat QR kamar: kategori terisi otomatis sejak dibuat, jadi
+    // tidak ada log verifikasi. Petugas hanya memindahkan status ke Diproses.
+    channel: 'qr',
     raw_text:
       'Air panas di kamar mandi kamar 207 tidak keluar sejak pagi, keran hanya mengeluarkan air dingin.',
     ai_category: 'teknisi',
@@ -231,19 +261,18 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
     category: 'teknisi',
     department: 'engineering',
     status: 'diproses',
-    created_by: 'user-staff',
+    created_by: 'guest',
     hoursAgo: 1,
-    verifiedHoursAgo: 0.8,
     logs: [
       {
         action: 'keluhan_dicatat',
-        detail: 'Keluhan dicatat melalui Front Desk.',
-        actor: 'Intan Permata',
+        detail: 'Keluhan dicatat melalui QR Kamar.',
+        actor: 'Tamu',
         hoursAgo: 1,
       },
       {
-        action: 'verifikasi_terima',
-        detail: 'Menerima rekomendasi AI: Teknisi & Fasilitas → Engineering.',
+        action: 'status_diubah',
+        detail: 'Status diubah dari Baru menjadi Diproses.',
         actor: 'Intan Permata',
         hoursAgo: 0.8,
       },
@@ -276,8 +305,6 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
       },
       {
         action: 'verifikasi_ubah',
-        detail:
-          'Mengubah kategori dari Teknisi & Fasilitas ke Perlu Ditinjau (Duty Manager). Alasan: insiden keselamatan lift.',
         actor: 'Ratna Puspita',
         hoursAgo: 4.5,
       },
@@ -298,6 +325,8 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
     ai_category: 'perlu_ditinjau',
     ai_confidence: 0,
     ai_reason: 'Keluhan tentang kolam renang yang ditutup tanpa pemberitahuan tidak masuk kategori operasional yang ada.',
+    category: 'perlu_ditinjau',
+    department: 'duty_manager',
     status: 'baru',
     created_by: 'user-staff',
     hoursAgo: 8,
@@ -324,7 +353,6 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
     status: 'diproses',
     created_by: 'user-staff',
     hoursAgo: 12,
-    verifiedHoursAgo: 11,
     logs: [
       {
         action: 'keluhan_dicatat',
@@ -333,8 +361,8 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
         hoursAgo: 12,
       },
       {
-        action: 'verifikasi_terima',
-        detail: 'Menerima rekomendasi AI: Kebersihan Kamar → Housekeeping.',
+        action: 'status_diubah',
+        detail: 'Status diubah dari Baru menjadi Diproses.',
         actor: 'Yusuf Maulana',
         hoursAgo: 11,
       },
@@ -366,7 +394,6 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
       },
       {
         action: 'verifikasi_ubah',
-        detail: 'Mengubah kategori dari Perlu Ditinjau ke Makanan & Minuman (F&B). Alasan: stok kopi lobi.',
         actor: 'Yusuf Maulana',
         hoursAgo: 19,
       },
@@ -392,7 +419,6 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
     status: 'diproses',
     created_by: 'user-manager',
     hoursAgo: 0.5,
-    verifiedHoursAgo: 0.3,
     logs: [
       {
         action: 'keluhan_dicatat',
@@ -401,8 +427,8 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
         hoursAgo: 0.5,
       },
       {
-        action: 'verifikasi_terima',
-        detail: 'Menerima rekomendasi AI: Teknisi & Fasilitas → Engineering.',
+        action: 'status_diubah',
+        detail: 'Status diubah dari Baru menjadi Diproses.',
         actor: 'Yusuf Maulana',
         hoursAgo: 0.3,
       },
@@ -416,6 +442,8 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
     ai_category: 'teknisi',
     ai_confidence: 0.4,
     ai_reason: 'Keluhan menyebut pintu balkon tidak bisa dikunci dan gagang pintunya longgar.',
+    category: 'teknisi',
+    department: 'engineering',
     status: 'baru',
     created_by: 'user-staff',
     hoursAgo: 10,
@@ -431,7 +459,9 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
   {
     guest_name: 'Sri Wahyuni',
     room_number: '305',
-    channel: 'front_desk',
+    // Keluhan tamu lewat QR kamar: kategori terisi otomatis; status bergerak
+    // Baru → Diproses → Selesai tanpa log verifikasi.
+    channel: 'qr',
     raw_text:
       'Resepsionis tidak ramah saat saya menanyakan tagihan, jawabannya singkat dan terkesan mengabaikan saya.',
     ai_category: 'resepsionis',
@@ -440,20 +470,19 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
     category: 'resepsionis',
     department: 'front_office',
     status: 'selesai',
-    created_by: 'user-staff',
+    created_by: 'guest',
     hoursAgo: 26,
-    verifiedHoursAgo: 25,
     resolvedHoursAgo: 24,
     logs: [
       {
         action: 'keluhan_dicatat',
-        detail: 'Keluhan dicatat melalui Front Desk.',
-        actor: 'Intan Permata',
+        detail: 'Keluhan dicatat melalui QR Kamar.',
+        actor: 'Tamu',
         hoursAgo: 26,
       },
       {
-        action: 'verifikasi_terima',
-        detail: 'Menerima rekomendasi AI: Resepsionis → Front Office.',
+        action: 'status_diubah',
+        detail: 'Status diubah dari Baru menjadi Diproses.',
         actor: 'Yusuf Maulana',
         hoursAgo: 25,
       },
@@ -474,6 +503,8 @@ export const SEED_COMPLAINTS: SeedComplaint[] = [
     ai_category: 'fnb',
     ai_confidence: 1,
     ai_reason: 'Keluhan menyebut nasi goreng pesanan anak masih mentah dan rasanya hambar.',
+    category: 'fnb',
+    department: 'fnb',
     status: 'baru',
     created_by: 'user-staff',
     hoursAgo: 4,

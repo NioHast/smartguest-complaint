@@ -7,7 +7,7 @@ import type { CategoryCode, ComplaintStatus, DepartmentCode } from './types';
 
 /**
  * Transisi status yang diizinkan. `baru` tidak boleh langsung ke `selesai`:
- * keluhan wajib melewati status `diproses` (verifikasi) lebih dulu.
+ * keluhan wajib melewati status berurutan (`baru` → `diproses` → `selesai`).
  */
 export const ALLOWED_TRANSITIONS: Record<ComplaintStatus, readonly ComplaintStatus[]> = {
   baru: ['diproses'],

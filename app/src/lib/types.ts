@@ -52,12 +52,13 @@ export const DEPARTMENT_LABELS: Record<DepartmentCode, string> = {
 // Kanal masuk keluhan
 // ---------------------------------------------------------------------------
 
-export const CHANNELS = ['front_desk', 'phone', 'whatsapp', 'email', 'other'] as const;
+export const CHANNELS = ['front_desk', 'qr', 'phone', 'whatsapp', 'email', 'other'] as const;
 
 export type Channel = (typeof CHANNELS)[number];
 
 export const CHANNEL_LABELS: Record<Channel, string> = {
   front_desk: 'Front Desk',
+  qr: 'QR Kamar',
   phone: 'Telepon',
   whatsapp: 'WhatsApp',
   email: 'Email',

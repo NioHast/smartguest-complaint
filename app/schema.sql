@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS complaints (
   guest_name TEXT,
   room_number TEXT,
   channel TEXT NOT NULL DEFAULT 'front_desk'
-    CHECK (channel IN ('front_desk', 'phone', 'whatsapp', 'email', 'other')),
+    CHECK (channel IN ('front_desk', 'qr', 'phone', 'whatsapp', 'email', 'other')),
   raw_text TEXT NOT NULL,
   ai_category TEXT
     CHECK (ai_category IN ('kebersihan', 'teknisi', 'fnb', 'resepsionis', 'perlu_ditinjau')),
@@ -43,7 +43,9 @@ CREATE TABLE IF NOT EXISTS complaints (
   verified_by TEXT,
   verified_at TEXT,
   change_reason TEXT,
-  created_by TEXT REFERENCES users(id) ON DELETE SET NULL,
+  -- Pencatat keluhan: id petugas, atau sentinel 'guest' untuk kanal QR (tamu
+  -- mencatat sendiri). Karena itu kolom ini bukan foreign key ke users.
+  created_by TEXT,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   resolved_at TEXT

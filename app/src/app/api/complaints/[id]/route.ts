@@ -50,44 +50,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     // ---------------------------------------------------------------------
-    // Terima rekomendasi AI
-    // ---------------------------------------------------------------------
-    if (action === 'accept') {
-      if (complaint.status === 'selesai') {
-        return NextResponse.json(
-          { error: 'Keluhan yang sudah selesai tidak dapat diverifikasi ulang.' },
-          { status: 400 }
-        );
-      }
-      if (!complaint.ai_category) {
-        return NextResponse.json(
-          { error: 'Keluhan ini belum memiliki rekomendasi AI yang bisa diterima.' },
-          { status: 400 }
-        );
-      }
-      if (complaint.category) {
-        return NextResponse.json(
-          { error: 'Keluhan sudah diverifikasi. Gunakan aksi ubah bila perlu mengoreksi kategori.' },
-          { status: 400 }
-        );
-      }
-
-      const category = complaint.ai_category;
-      const department = CATEGORY_TO_DEPARTMENT[category];
-
-      const updated = await dbService.updateVerification(id, {
-        category,
-        department,
-        actor: user.full_name,
-        action: 'verifikasi_terima',
-        detail: `Menerima rekomendasi AI: ${CATEGORY_LABELS[category]} → ${DEPARTMENT_LABELS[department]}.`,
-      });
-
-      return NextResponse.json({ complaint: updated });
-    }
-
-    // ---------------------------------------------------------------------
-    // Ubah kategori + departemen (wajib alasan)
+    // Koreksi kategori + departemen (wajib alasan)
     // ---------------------------------------------------------------------
     if (action === 'change') {
       if (complaint.status === 'selesai') {
@@ -191,7 +154,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     return NextResponse.json(
-      { error: "Aksi tidak dikenali. Gunakan 'accept', 'change', atau 'status'." },
+      { error: "Aksi tidak dikenali. Gunakan 'change' atau 'status'." },
       { status: 400 }
     );
   } catch (err) {

@@ -2,7 +2,7 @@
 //
 // Satu jalur: LLM (SDK OpenAI; endpoint diatur lewat AI_BASE_URL untuk
 // provider kompatibel). Tanpa AI_API_KEY tidak ada jalur alternatif: pemanggil
-// menerima ClassifierError dan wajib menggagalkan permintaan.
+// menerima ClassifierError lalu menyimpan keluhan sebagai Perlu Ditinjau.
 
 import OpenAI from 'openai';
 import type { ChatCompletion } from 'openai/resources/chat/completions';
@@ -242,7 +242,7 @@ async function classifyWithLlm(text: string, config: AiConfig): Promise<Classifi
 /**
  * Klasifikasi utama. Tidak pernah mengembalikan hasil alternatif: tanpa
  * konfigurasi AI atau saat LLM gagal, ClassifierError dilempar dan pemanggil
- * wajib menggagalkan permintaan.
+ * menyimpan keluhan sebagai Perlu Ditinjau untuk ditangani manual.
  */
 export async function classifyComplaint(text: string): Promise<ClassificationResult> {
   const config = getAiConfig();
