@@ -1,4 +1,4 @@
-// Halaman QR kamar (server component, tanpa sesi).
+// Halaman QR kamar (server component di dalam shell, perlu sesi petugas).
 //
 // Menerima daftar kamar lewat query `?kamar=101,102,305`. Setiap QR dirender
 // sebagai SVG inline di server memakai paket `qrcode`, sehingga halaman bisa
@@ -61,7 +61,7 @@ export default async function QrPage({
   const singleCard = isSingle ? cards[0] : null;
 
   return (
-    <main className="qr-page min-h-screen w-full bg-[var(--paper)] px-4 py-8 sm:px-6 sm:py-10">
+    <div className="qr-page min-h-screen w-full bg-[var(--paper)] px-4 py-8 sm:px-6 sm:py-10">
       <div className="mx-auto w-full max-w-6xl">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -132,6 +132,6 @@ export default async function QrPage({
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

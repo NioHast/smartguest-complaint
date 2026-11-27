@@ -10,6 +10,11 @@ export function proxy(request: NextRequest) {
 
   const hasSessionCookie = Boolean(request.cookies.get(SESSION_COOKIE)?.value);
   if (hasSessionCookie) {
+    // Redirect status harus dikirim sebelum shell klien mulai di-stream.
+    // Redirect di page tetap ada sebagai jalur kanonik di server component.
+    if (pathname === '/') {
+      return NextResponse.redirect(new URL('/dasbor', request.url));
+    }
     return NextResponse.next();
   }
 
@@ -22,5 +27,12 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/api/complaints/:path*'],
+  matcher: [
+    '/',
+    '/dasbor/:path*',
+    '/catat/:path*',
+    '/keluhan/:path*',
+    '/qr/:path*',
+    '/api/complaints/:path*',
+  ],
 };

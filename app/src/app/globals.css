@@ -361,6 +361,24 @@ body {
     display: none !important;
   }
 
+  /* Shell aplikasi: sidebar & header tidak ikut tercetak, konten mengalir penuh. */
+  .app-sidebar,
+  .app-header,
+  .no-print {
+    display: none !important;
+  }
+
+  .app-shell,
+  .app-main {
+    display: block !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
   .qr-page {
     min-height: auto !important;
     padding: 0 !important;

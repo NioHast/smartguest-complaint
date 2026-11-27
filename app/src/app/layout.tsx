@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
   title: "SmartGuest | Manajemen Keluhan Tamu",
@@ -28,9 +27,7 @@ export default function RootLayout({
   return (
     <html lang="id" className="h-full antialiased">
       <body className="flex min-h-full flex-col">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        {children}
       </body>
     </html>
   );
