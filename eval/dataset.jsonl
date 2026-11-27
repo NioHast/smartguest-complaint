@@ -1,0 +1,100 @@
+{"id":"E001","text":"Sprai di kamar 512 ada bercak kuning dan bau apek, tolong segera diganti.","label":"kebersihan"}
+{"id":"E002","text":"AC kamar 604 sama sekali tidak dingin, sudah disetel 16 derajat tetap gerah.","label":"teknisi"}
+{"id":"E003","text":"Nasi ayam pesanan saya masih mentah di bagian dalam, tolong diganti.","label":"fnb"}
+{"id":"E004","text":"Check-in saya antre hampir 40 menit karena hanya satu loket buka.","label":"resepsionis"}
+{"id":"E005","text":"Ada tamu lain merokok di koridor lantai 3 padahal ada tanda dilarang merokok.","label":"perlu_ditinjau","notes":"Di luar 4 departemen: pelanggaran aturan tamu, perlu ditinjau."}
+{"id":"E006","text":"Lantai kamar mandi licin dan masih ada rambut di saluran air, kurang bersih.","label":"kebersihan"}
+{"id":"E007","text":"Lampu kamar mandi mati dan tidak ada lampu cadangan, gelap sekali.","label":"teknisi"}
+{"id":"E008","text":"Sup yang datang sudah dingin dan rasanya terlalu asin.","label":"fnb"}
+{"id":"E009","text":"Resepsionis malam ini jutek, saya tanya lokasi lift dijawab tanpa melihat.","label":"resepsionis"}
+{"id":"E010","text":"Pesta di kamar sebelah berisik sampai jam 2 pagi, saya tidak bisa tidur.","label":"perlu_ditinjau","notes":"Kebisingan antar-tamu; tidak ada kategori tetap yang cocok, perlu ditinjau."}
+{"id":"E011","text":"Sampah di bawah tempat tidur belum diangkut sejak dua hari lalu dan mulai bau.","label":"kebersihan"}
+{"id":"E012","text":"TV di kamar 210 tidak mau nyala, kabelnya juga lepas dari stopkontak.","label":"teknisi"}
+{"id":"E013","text":"Sarapan buffet habis jam 8 padahal jam makan sampai 10, tidak ada yang diisi.","label":"fnb"}
+{"id":"E014","text":"Saya sudah bayar penuh lewat aplikasi tapi saat check-in diminta bayar lagi.","label":"resepsionis"}
+{"id":"E015","text":"Dompet saya hilang di area kolam renang, mohon dibantu cek CCTV.","label":"perlu_ditinjau","notes":"Kehilangan barang; perlu ditinjau oleh duty manager."}
+{"id":"E016","text":"Karpet di kamar 308 banyak debu, saya jadi bersin sepanjang malam.","label":"kebersihan"}
+{"id":"E017","text":"Kunci kartu kamar 318 selalu gagal di pintu, harus gesek berkali-kali.","label":"teknisi"}
+{"id":"E018","text":"Jus jeruk yang saya pesan rasanya asam seperti sudah basi.","label":"fnb"}
+{"id":"E019","text":"Reservasi kamar saya hilang dari sistem padahal sudah konfirmasi lewat email.","label":"resepsionis"}
+{"id":"E020","text":"Parkir mobil saya lecet saat diparkir valet, siapa yang bertanggung jawab?","label":"perlu_ditinjau","notes":"Klaim valet/parkir; di luar 4 departemen, perlu ditinjau."}
+{"id":"E021","text":"Gelas dan cangkir di kamar masih ada bekas lipstik, sepertinya belum dicuci.","label":"kebersihan"}
+{"id":"E022","text":"Shower kamar 425 tidak keluar air sama sekali, keran hanya bunyi.","label":"teknisi"}
+{"id":"E023","text":"Room service terlambat satu jam dari estimasi, makanan sudah tidak layak.","label":"fnb"}
+{"id":"E024","text":"Check-out lambat karena staf sibuk mengobrol, saya hampir ketinggalan pesawat.","label":"resepsionis"}
+{"id":"E025","text":"Kolam renang ditutup tanpa pemberitahuan padahal anak saya sudah siap berenang.","label":"perlu_ditinjau","notes":"Kebijakan fasilitas; tidak masuk kategori tetap, perlu ditinjau."}
+{"id":"E026","text":"Selimut tambahan yang saya minta ternyata berbau apek dan ada noda.","label":"kebersihan"}
+{"id":"E027","text":"WiFi di lantai 5 putus nyambung terus, video call saya jadi berantakan.","label":"teknisi"}
+{"id":"E028","text":"Kue di meja kopi berjamur, tolong dicek dapur.","label":"fnb"}
+{"id":"E029","text":"Deposit saya belum dikembalikan padahal sudah 3 hari check-out.","label":"resepsionis"}
+{"id":"E030","text":"Saya minta extra bed tapi staf bilang tidak tersedia tanpa alasan jelas.","label":"perlu_ditinjau","notes":"Permintaan fasilitas tanpa departemen jelas; perlu ditinjau."}
+{"id":"E031","text":"Toilet kamar 221 masih ada kerak dan airnya kuning, mohon dibersihkan ulang.","label":"kebersihan"}
+{"id":"E032","text":"Kran wastafel 507 bocor dan air menetes ke lantai sepanjang malam.","label":"teknisi"}
+{"id":"E033","text":"Steak yang saya minta medium well datang gosong di luar dan mentah di dalam.","label":"fnb"}
+{"id":"E034","text":"Resepsionis salah memberikan kunci, saya masuk ke kamar orang lain.","label":"resepsionis"}
+{"id":"E035","text":"Pelayanan hotel ini buruk sekali, saya kecewa dengan semua staf.","label":"perlu_ditinjau","notes":"Terlalu umum, tidak menyebut departemen; perlu ditinjau."}
+{"id":"E036","text":"Jendela kamar penuh debu tebal sampai pemandangan tidak kelihatan jelas.","label":"kebersihan"}
+{"id":"E037","text":"Lampu utama kamar 233 berkedip-kedip lalu mati total.","label":"teknisi"}
+{"id":"E038","text":"Menu yang tertera di aplikasi tidak tersedia semua, staf bilang habis padahal baru jam 7.","label":"fnb"}
+{"id":"E039","text":"Saya minta late check-out dan sudah disetujui, tapi pagi ini staf bilang tidak ada catatan.","label":"resepsionis"}
+{"id":"E040","text":"Anjing tamu lain lepas di lobi dan mengejar anak saya.","label":"perlu_ditinjau","notes":"Insiden keamanan; perlu ditinjau."}
+{"id":"E041","text":"Bantal kamar bau keringat dan sarungnya kotor, tidak nyaman dipakai tidur.","label":"kebersihan"}
+{"id":"E042","text":"Telepon kamar tidak ada nada, saya tidak bisa menghubungi front desk.","label":"teknisi"}
+{"id":"E043","text":"Air mineral di minibar sudah kedaluwarsa, tolong diganti.","label":"fnb"}
+{"id":"E044","text":"Tagihan akhir ada biaya laundry yang tidak pernah saya pakai.","label":"resepsionis"}
+{"id":"E045","text":"Saya ingin menyampaikan keluhan tapi tidak tahu harus ke bagian mana.","label":"perlu_ditinjau","notes":"Tidak jelas; perlu ditinjau."}
+{"id":"E046","text":"Ada bercak darah di sprei kamar 407, saya minta kamar dibersihkan ulang total.","label":"kebersihan"}
+{"id":"E047","text":"Pintu kamar 119 susah ditutup, kuncinya macet dan tidak bisa dikunci dari dalam.","label":"teknisi"}
+{"id":"E048","text":"Porsi sarapan anak sangat kecil dibanding yang di foto menu.","label":"fnb"}
+{"id":"E049","text":"Pesanan taksi bandara yang dijanjikan resepsionis tidak datang.","label":"resepsionis"}
+{"id":"E050","text":"Musik di lobi terlalu keras sampai kamar saya terdengar.","label":"perlu_ditinjau","notes":"Kebisingan area umum; perlu ditinjau."}
+{"id":"E051","text":"Peralatan mandi sudah habis dan sabun di dispenser tinggal sedikit, housekeeping belum datang.","label":"kebersihan"}
+{"id":"E052","text":"Setrika di kamar 311 tidak panas sama sekali padahal sudah dicolok lama.","label":"teknisi"}
+{"id":"E053","text":"Sambal di meja restoran sudah berbau tengik dan ada di beberapa meja.","label":"fnb"}
+{"id":"E054","text":"Resepsionis menolak menyimpan barang titipan padahal saya tamu yang menginap.","label":"resepsionis"}
+{"id":"E055","text":"Anak saya jatuh di tangga karena pegangan licin, mohon diperiksa.","label":"perlu_ditinjau","notes":"Keselamatan/insiden; perlu ditinjau."}
+{"id":"E056","text":"Kamar 305 bau asap rokok padahal non-smoking, dan sprei juga kotor bernoda.","label":"kebersihan","notes":"Ambigu: sprei kotor (housekeeping) vs bau asap rokok (perlu ditinjau). Label kebersihan karena kondisi permukaan kamar harus ditangani housekeeping lebih dulu."}
+{"id":"E057","text":"AC berisik dan berbau apek, saya jadi pusing.","label":"teknisi","notes":"Ambigu: AC berisik (teknisi) vs bau apek (kebersihan). Label teknisi karena unit AC sendiri yang bermasalah."}
+{"id":"E058","text":"Makanan lambat datang dan kamar saya juga belum dibersihkan.","label":"fnb","notes":"Ambigu: keterlambatan makanan (fnb) vs kamar belum dibersihkan (kebersihan). Label fnb karena pesanan makanan adalah keluhan utama."}
+{"id":"E059","text":"Check-in lama dan kamar yang saya dapat belum dibersihkan.","label":"resepsionis","notes":"Ambigu: proses check-in (resepsionis) vs kamar kotor (kebersihan). Label resepsionis karena keluhan pertama adalah antrean check-in."}
+{"id":"E060","text":"Saya minta dibangunkan jam 5 pagi tapi telepon tidak berbunyi.","label":"perlu_ditinjau","notes":"Layanan wake-up call; penanggung jawab tidak jelas, perlu ditinjau."}
+{"id":"E061","text":"Sprei dan sarung bantal kotor, dan TV juga tidak bisa dinyalakan.","label":"kebersihan","notes":"Ambigu: seprai kotor (kebersihan) vs TV mati (teknisi). Label kebersihan karena keluhan pertama dan paling spesifik."}
+{"id":"E062","text":"Air panas tidak keluar dan handuknya juga tidak diganti.","label":"teknisi","notes":"Ambigu: air panas (teknisi) vs handuk (kebersihan). Label teknisi karena kegagalan air panas adalah masalah fasilitas utama."}
+{"id":"E063","text":"Sarapan dingin dan AC di restoran terlalu panas.","label":"fnb","notes":"Ambigu: kualitas sarapan (fnb) vs AC restoran (teknisi). Label fnb karena makanan yang disajikan salah suhu."}
+{"id":"E064","text":"Saya minta kamar tambahan tapi staf bilang AC di lantai itu rusak semua.","label":"resepsionis","notes":"Ambigu: alokasi kamar (resepsionis) vs AC rusak (teknisi). Label resepsionis karena inti keluhan adalah penolakan permintaan kamar."}
+{"id":"E065","text":"Barang bawaan saya tertukar dengan tamu lain saat check-out.","label":"perlu_ditinjau","notes":"Insiden antar-tamu; perlu ditinjau."}
+{"id":"E066","text":"Ada kecoa di kamar mandi dan shower juga tidak mengalir.","label":"kebersihan","notes":"Ambigu: kecoa (kebersihan) vs shower tidak mengalir (teknisi). Label kebersihan karena hama adalah risiko kesehatan."}
+{"id":"E067","text":"Lampu kamar mati dan saya sudah telepon front desk tapi tidak diangkat.","label":"teknisi","notes":"Ambigu: lampu mati (teknisi) vs front desk tidak menjawab (resepsionis). Label teknisi karena perbaikan lampu adalah inti keluhan."}
+{"id":"E068","text":"Saya pesan room service jam 7 malam, sampai jam 9 belum datang dan staf bilang pesanan tidak tercatat.","label":"fnb","notes":"Ambigu: pesanan hilang (fnb) vs komunikasi staf (resepsionis). Label fnb karena kegagalan ada di alur pesanan makanan."}
+{"id":"E069","text":"Resepsionis bilang restoran tutup padahal masih jam 9, saya jadi tidak makan malam.","label":"resepsionis","notes":"Ambigu: informasi staf (resepsionis) vs jam operasional restoran (fnb). Label resepsionis karena informasi yang diberikan staf salah."}
+{"id":"E070","text":"Situasi di hotel ini membuat liburan saya tidak nyaman, tolong ditindaklanjuti.","label":"perlu_ditinjau","notes":"Terlalu umum tanpa detail; perlu ditinjau."}
+{"id":"E071","text":"Kamar mandi bau dan lampunya mati, susah mau mandi.","label":"kebersihan","notes":"Ambigu: bau kamar mandi (kebersihan) vs lampu mati (teknisi). Label kebersihan karena bau lebih mengganggu dan harus segera ditangani."}
+{"id":"E072","text":"WiFi lemot dan kopi di kamar tidak diisi ulang.","label":"teknisi","notes":"Ambigu: WiFi (teknisi) vs kopi kamar (fnb). Label teknisi karena koneksi adalah kebutuhan kerja yang mendesak."}
+{"id":"E073","text":"Tagihan restoran ada item yang tidak saya pesan dan makanannya juga telat.","label":"fnb","notes":"Ambigu: tagihan (resepsionis) vs makanan telat (fnb). Label fnb karena item tak dikenal berasal dari salah input pesanan restoran."}
+{"id":"E074","text":"Antrean check-out panjang dan lift juga macet.","label":"resepsionis","notes":"Ambigu: antrean (resepsionis) vs lift macet (teknisi). Label resepsionis karena keluhan pertama adalah proses check-out."}
+{"id":"E075","text":"Tamu di kamar sebelah membawa hewan peliharaan yang membuat saya alergi.","label":"perlu_ditinjau","notes":"Kebijakan hewan peliharaan; perlu ditinjau."}
+{"id":"E076","text":"Sampah menumpuk di koridor dan lampu koridor mati.","label":"kebersihan","notes":"Ambigu: sampah koridor (kebersihan) vs lampu mati (teknisi). Label kebersihan karena sampah berpotensi menimbulkan bau dan hama."}
+{"id":"E077","text":"TV tidak bisa nyala, saya minta tukar kamar tapi resepsionis bilang penuh.","label":"teknisi","notes":"Ambigu: TV rusak (teknisi) vs permintaan tukar kamar (resepsionis). Label teknisi karena akar masalahnya perangkat TV."}
+{"id":"E078","text":"Makanan kamar datang tapi piring kotor dan ada rambut di nasi.","label":"fnb","notes":"Ambigu: piring kotor (kebersihan) vs rambut di makanan (fnb). Label fnb karena rambut di makanan adalah masalah kualitas sajian."}
+{"id":"E079","text":"Saya komplain AC ke front desk tiga kali tapi tidak ada tindak lanjut.","label":"resepsionis","notes":"Ambigu: AC rusak (teknisi) vs tidak ada tindak lanjut (resepsionis). Label resepsionis karena yang disorot adalah kegagalan penanganan keluhan."}
+{"id":"E080","text":"Terima kasih, kamar kami bersih dan staf housekeeping sangat ramah.","label":"perlu_ditinjau","notes":"Pujian, bukan keluhan."}
+{"id":"E081","text":"Tamu sebelah berisik dan sampah makanan mereka menumpuk di koridor.","label":"kebersihan","notes":"Ambigu: kebersihan koridor vs kebisingan tamu (perlu ditinjau). Label kebersihan karena sampah punya penanggung jawab yang jelas."}
+{"id":"E082","text":"Shower bocor sampai kamar mandi banjir dan handuk habis.","label":"teknisi","notes":"Ambigu: kebocoran shower (teknisi) vs handuk habis (kebersihan). Label teknisi karena kebocoran bisa merusak kamar."}
+{"id":"E083","text":"Sarapan buffet ramai dan saya menunggu 20 menit untuk kursi, padahal makanan juga habis.","label":"fnb","notes":"Ambigu: kapasitas restoran (fnb) vs pelayanan kursi (resepsionis). Label fnb karena persediaan makanan ikut habis."}
+{"id":"E084","text":"Kamar saya berisik dan resepsionis hanya bilang tidak bisa pindah.","label":"resepsionis","notes":"Ambigu: kebisingan (perlu ditinjau) vs penanganan staf (resepsionis). Label resepsionis karena keluhan utama adalah sikap dan solusi staf."}
+{"id":"E085","text":"Sarapan tadi enak sekali, tolong sampaikan ke chef.","label":"perlu_ditinjau","notes":"Pujian, bukan keluhan."}
+{"id":"E086","text":"handuk kamar bau apek bgt","label":"kebersihan"}
+{"id":"E087","text":"ac gk dingin dr tdi mlm","label":"teknisi"}
+{"id":"E088","text":"nasi goreng kmrn hambar bgt","label":"fnb"}
+{"id":"E089","text":"check in lama bgt antre 40 mnt","label":"resepsionis"}
+{"id":"E090","text":"Apakah hotel menyediakan antar-jemput ke bandara?","label":"perlu_ditinjau","notes":"Pertanyaan, bukan keluhan."}
+{"id":"E091","text":"kmr mandi kotor, lantai lengket","label":"kebersihan"}
+{"id":"E092","text":"wifi lemot bgt gk bs buka email","label":"teknisi"}
+{"id":"E093","text":"sarapan gk ada yg ngisi, kosong mlm","label":"fnb"}
+{"id":"E094","text":"resepsionisnya jutek gk ramah bgt","label":"resepsionis"}
+{"id":"E095","text":"Kamar mandi bersih dan air panas lancar, kami puas menginap di sini.","label":"perlu_ditinjau","notes":"Pujian, bukan keluhan."}
+{"id":"E096","text":"sampah gk diangkut 2 hr","label":"kebersihan"}
+{"id":"E097","text":"lampu kmr mandi mati total","label":"teknisi"}
+{"id":"E098","text":"mknan rm svc telat 1 jam","label":"fnb"}
+{"id":"E099","text":"deposit blm balik 3 hari","label":"resepsionis"}
+{"id":"E100","text":"Jam berapa kolam renang dibuka besok pagi?","label":"perlu_ditinjau","notes":"Pertanyaan, bukan keluhan."}

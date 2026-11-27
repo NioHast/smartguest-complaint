@@ -113,7 +113,7 @@ klasifikasi awal (`ai_*`) dipilih lewat `SEED_MODE`:
 `SEED_MODE` hanya dibaca ketika database kosong; ubah nilainya di `app/.env`
 lalu reset database agar berlaku. Pada jalur `ai`, `app/data/seed-ai.json` wajib
 ada dan lengkap untuk 15 keluhan. Bila tidak, seeding gagal dengan pesan
-"Jalankan npm run seed:ai terlebih dahulu."; tidak ada fallback diam-diam ke
+"Jalankan npm run seed:ai terlebih dahulu."; tidak ada peralihan diam-diam ke
 jalur statis.
 
 Pada jalur `ai`, nilai kategori/departemen **data seed** mengikuti aturan koherensi: entri seed yang tidak punya kategori tetap tanpa kategori, entri dengan `change_reason` mempertahankan keputusan petugas, dan entri tanpa `change_reason` mengikuti kategori AI beserta pemetaan departemennya. Aturan ini hanya untuk data demo; keluhan baru yang dibuat lewat aplikasi selalu mendapat kategori dan departemen otomatis.
@@ -197,6 +197,7 @@ Jalankan dari direktori `app/`.
 | `npm run dev` | Server pengembangan di port 3000. |
 | `npm run dev:3123` | Server pengembangan di port 3123. |
 | `npm run test` | Tes alur kerja dengan `node --test`. |
+| `npm run eval` | Evaluasi klasifikasi 100 item; butuh `AI_API_KEY` dan menulis hasil ke `eval/results/`. |
 | `npm run seed:ai` | Bekukan klasifikasi AI untuk 15 keluhan seed ke `data/seed-ai.json`. |
 | `npm run db:reset` | Hapus database SQLite lokal; dibuat ulang saat server start. |
 | `npm run build && npm start` | Build produksi lalu jalankan server. |
@@ -211,7 +212,7 @@ Jalankan dari direktori `app/`.
 ## Batasan yang diketahui
 
 - Belum ada rate limit pada `POST /api/public/complaints`. Siapa pun yang bisa menjangkau alamat server dapat mengirim keluhan berulang; pengamanan saat ini mengandalkan jaringan lokal. Ini batasan proyek akademik, bukan jaminan untuk produksi.
-- Belum ada dataset evaluasi maupun confusion matrix, sehingga belum ada angka performa klasifikasi yang diklaim.
+- Evaluasi klasifikasi sudah dijalankan pada 27 November 2026 dengan model `deepseek-chat`: **akurasi 89% (89/100)**, **macro-F1 0.89** pada dataset sintetis 100 item. Metode, angka lengkap, metrik per kategori, confusion matrix, dan batasannya ada di [`docs/EVALUATION.md`](docs/EVALUATION.md); angka mentahnya di [`eval/results/summary.md`](eval/results/summary.md).
 - Halaman `/qr` membentuk URL dari header `Host`; untuk scan dari HP pastikan halaman dibuka lewat alamat LAN server, bukan `localhost`/`127.0.0.1`.
 - Notifikasi Telegram bersifat best-effort: kegagalan pengiriman tidak menggagalkan pencatatan keluhan.
 
